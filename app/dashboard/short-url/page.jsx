@@ -1,9 +1,17 @@
+import Data from "@/components/shortUrl/Data";
+import FormCreate from "@/components/shortUrl/FormCreate";
+
+
 import React from 'react'
 
-const page = () => {
+export default function page() {
   return (
-    <div>short</div>
+    <>
+     
+        <FormCreate />
+      
+        <Data />
+      
+    </>
   )
 }
-
-export default page

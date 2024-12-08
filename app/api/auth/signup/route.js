@@ -5,7 +5,6 @@ import User from '@/models/users';
 
 export async function POST(req) {
   const { name, email, password } = await req.json();
-  console.log({ name, email, password });
 
   // Validasi input
   if (!name || !validator.isLength(name, { min: 3, max: 50 })) {

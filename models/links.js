@@ -34,12 +34,12 @@ const Link = sequelize.define('links', {
   },
   idUsers: {
     type: DataTypes.UUID,
-    allowNull: true,  // Kolom ini opsional
+    allowNull: false,  // Kolom ini opsional
     references: {
       model: 'users',  // Mengacu pada model 'users'
       key: 'id',       // Menghubungkan dengan kolom 'id' di tabel 'users'
     },
-    onDelete: 'SET NULL',  // Jika user yang terkait dihapus, maka idUsers akan diset null
+    onDelete: 'S',  // Jika user yang terkait dihapus, maka idUsers akan diset null
   },
 }, {
   timestamps: true,  // Menambahkan kolom createdAt dan updatedAt

@@ -21,7 +21,7 @@ const Url = sequelize.define('urls', {
   },
   userId: {
     type: DataTypes.UUID,
-    allowNull: true,  // Bisa null jika tidak ada user yang memiliki URL
+    allowNull: false,  // Bisa null jika tidak ada user yang memiliki URL
     references: {
       model: 'users', // Mengacu pada model 'users'
       key: 'id',      // Kolom 'id' di model users
