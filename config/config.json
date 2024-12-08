@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "dcryptmy_munadi1406",
+    "password": "Munadi1406!",
+    "database": "dcryptmy_short_url",
+    "host": "89.213.211.226",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "dcryptmy_munadi1406",
+    "password": "Munadi1406!",
+    "database": "dcryptmy_short_url",
+    "host": "89.213.211.226",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "dcryptmy_munadi1406",
+    "password": "Munadi1406!",
+    "database": "dcryptmy_short_url",
+    "host": "89.213.211.226",
+    "dialect": "mysql"
+  }
+}
