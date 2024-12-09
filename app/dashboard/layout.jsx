@@ -1,6 +1,7 @@
 import { AppSidebar } from "@/components/app-sidebar"
 import DynamicBreadcrumb from "@/components/DynamicBreadCrumb"
-
+import { Toaster } from "@/components/ui/toaster"
+import { Toaster as ToastSonner } from "sonner"
 import { Separator } from "@/components/ui/separator"
 import {
     SidebarInset,
@@ -16,6 +17,7 @@ export default async function layout({ children }) {
 
     return (
 
+
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
@@ -26,10 +28,16 @@ export default async function layout({ children }) {
                         <DynamicBreadcrumb />
                     </div>
                 </header>
-                <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                    {children}
+                <div className="w-full grid grid-cols-1 relative">
+                    <div className="p-2 border border-gray-300 shadow-md rounded-md m-2">
+                        {children}
+                    </div>
                 </div>
+                <Toaster />
+                <ToastSonner/>
+                
             </SidebarInset>
         </SidebarProvider>
+
     )
 }

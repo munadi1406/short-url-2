@@ -20,8 +20,7 @@ export async function signup(state, formData) {
     // e.g. Hash the user's password before storing it
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // 3. Insert the user into the database or call an Library API
-    console.log({ name, email, password: hashedPassword })
+
 
    
 

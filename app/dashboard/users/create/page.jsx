@@ -17,7 +17,7 @@ export default function SignupForm() {
       if (!data.name || !data.email || !data.password) {
         throw new Error("All fields are required");
       }
-      console.log("Form Submitted", data);
+  
       const creteUsers = await axios.post("/api/auth/signup", data);
       return creteUsers;
     },
@@ -26,7 +26,7 @@ export default function SignupForm() {
     },
     onSuccess: () => {
       setErrors({});
-      console.log("akun berhasil dibuat")
+   
     },
   });
 

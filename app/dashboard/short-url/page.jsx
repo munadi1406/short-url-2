@@ -6,12 +6,9 @@ import React from 'react'
 
 export default function page() {
   return (
-    <>
-     
-        <FormCreate />
-      
-        <Data />
-      
-    </>
+    <div>
+      <FormCreate />
+      <Data />
+    </div>
   )
 }

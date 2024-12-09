@@ -85,26 +85,19 @@ const data = {
       ],
     },
     {
-      title: "Documentation",
+      title: "Article",
       url: "#",
       icon: BookOpen,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "Create Article",
+          url: "/dashboard/article/create",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "Articles",
+          url: "/dashboard/article",
         },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
+       
       ],
     },
     {

@@ -28,12 +28,12 @@ export function LoginForm() {
       return response.data;
     },
     onError: (error) => {
-      console.log(error)
+     
       setError(error.response?.data?.msg || "Something went wrong. Please try again.");
     },
     onSuccess: (data) => {
       setError("");
-      console.log("User Data:", data);
+ 
       router.push('/dashboard');
     },
   });

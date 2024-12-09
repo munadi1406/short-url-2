@@ -43,9 +43,7 @@ export function NavUser() {
     getUserData()
   },[])
 
-  useEffect(()=>{
-    console.log(user)
-  },[user])
+ 
 
   return (
     (<SidebarMenu>

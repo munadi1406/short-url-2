@@ -17,6 +17,8 @@ import { useInView } from 'react-intersection-observer'; // Import hook untuk In
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
+import EditForm from "./EditForm";
+import DeleteLink from "./DeleteLink";
 
 export default function Data() {
     const {
@@ -25,6 +27,7 @@ export default function Data() {
         hasNextPage,
         isLoading,
         isFetchingNextPage,
+        refetch
     } = useInfiniteQuery({
         queryKey: ['links'],
         queryFn: async ({ pageParam }) => {
@@ -63,8 +66,8 @@ export default function Data() {
     }, [inView]);
 
     return (
-        <div>
-            <Table className="overflow-scroll">
+        <div >
+            <Table className="overflow-scroll ">
                 <TableCaption>Daftar Link yang Tersedia</TableCaption>
                 <TableHeader>
                     <TableRow>
@@ -101,7 +104,7 @@ export default function Data() {
                                     <TableCell>{new Date(link.createdAt).toLocaleString()}</TableCell>
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
                                         <Button onClick={() => handleEdit(link)}>Edit</Button>
-                                        <Button className="bg-red-600 hover:bg-red-700">Hapus</Button>
+                                        <DeleteLink data={link} refetch={refetch}/>
                                     </TableCell>
                                 </TableRow>
 
@@ -109,21 +112,7 @@ export default function Data() {
                                 {currentData?.id === link.id && isEdit && (
                                     <TableRow>
                                         <TableCell colSpan="5">
-                                            <div className="border-l-2 border-blue-600 p-2">
-                                                <div className="grid md:grid-cols-2 gap-2 grid-cols-1">
-                                                    <div>
-                                                        <Label htmlFor="editTitle">Judul</Label>
-                                                        <Input id="editTitle" name="title" defaultValue={currentData.title} />
-                                                    </div>
-                                                    <div>
-                                                        <Label htmlFor="editLink">Link</Label>
-                                                        <Input id="editLink" name="link" defaultValue={currentData.link} />
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <Button>Perbarui</Button>
-                                                </div>
-                                            </div>
+                                            <EditForm data={currentData} />
                                         </TableCell>
                                     </TableRow>
                                 )}

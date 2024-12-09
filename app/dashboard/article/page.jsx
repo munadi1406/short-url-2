@@ -1,8 +1,9 @@
-import React from 'react'
+
+import Data from '@/components/Article/Data'
 
 const page = () => {
   return (
-    <div>article</div>
+    <div><Data/></div>
   )
 }
 
