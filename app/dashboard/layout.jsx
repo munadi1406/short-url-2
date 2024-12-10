@@ -8,12 +8,11 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { getUser } from "@/lib/dal"
-import { redirect } from "next/navigation"
+// import { getUser } from "@/lib/dal"
+// import { redirect } from "next/navigation"
 
 export default async function layout({ children }) {
-    const datas = await getUser()
-    if (!datas) redirect('/')
+ 
 
     return (
 
