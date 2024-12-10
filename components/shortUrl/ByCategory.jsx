@@ -19,9 +19,24 @@ import EditForm from "./EditForm";
 import DeleteLink from "./DeleteLink";
 import Link from "next/link";
 import { Eye, Wrench } from "lucide-react";
-import ByCategory from './ByCategory'
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import DeleteLinkCategory from "./DeleteLinkCategory";
 
-export default function Data() {
+
+export default function ByCateory() {
+    const [expandedLinks, setExpandedLinks] = useState({});
+
+    // Fungsi untuk toggle sub-link
+    const handleToggle = (id) => {
+        setExpandedLinks((prev) => ({
+            ...prev,
+            [id]: !prev[id],  // Toggle state berdasarkan ID link
+        }));
+    };
     const {
         data,
         fetchNextPage,
@@ -30,9 +45,9 @@ export default function Data() {
         isFetchingNextPage,
         refetch
     } = useInfiniteQuery({
-        queryKey: ['links'],
+        queryKey: ['links-categori'],
         queryFn: async ({ pageParam }) => {
-            const response = await axios.get(`/api/shorten?${pageParam ? `lastCreatedAt=${pageParam}` : ''}`);
+            const response = await axios.get(`/api/shorten?${pageParam ? `lastCreatedAt=${pageParam}` : ''}&category=true`);
             return response.data;
         },
         getNextPageParam: (lastPage) => lastPage.pagination.lastCreatedAt,
@@ -59,18 +74,10 @@ export default function Data() {
         }
     };
 
-    // // Efek samping untuk memuat halaman berikutnya saat observer terlihat
-    // useEffect(() => {
-    //     if (inView && hasNextPage) {
-    //         fetchNextPage();
-    //     }
-    // }, [inView]);
+
 
     return (
         <div >
-
-            <ByCategory />
-
             <Table className="overflow-scroll ">
                 <TableCaption>Daftar Link yang Tersedia</TableCaption>
                 <TableHeader>
@@ -89,10 +96,10 @@ export default function Data() {
                             <TableCell colSpan="5">Memuat data...</TableCell>
                         </TableRow>
                     ) : (
-                        // Menampilkan data dari setiap halaman
+
                         data?.pages?.flatMap((page) => page.data).map((link, index) => (
                             <Fragment key={link.id}>
-                                <TableRow>
+                                <TableRow onClick={() => handleToggle(link.id)}>
                                     <TableCell className="font-medium">{index + 1}</TableCell>
                                     <TableCell>
                                         <a
@@ -107,10 +114,9 @@ export default function Data() {
                                     <TableCell>0</TableCell>
                                     <TableCell>{new Date(link.createdAt).toLocaleString()}</TableCell>
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
-                                        {console.log(link)}
-                                        <Button onClick={() => handleEdit(link)} ><Wrench /></Button>
+                                        <Button onClick={() => handleEdit(link)}><Wrench /></Button>
                                         <Link href={`/link/${link.short_url}`} target="_blank" className={buttonVariants()}><Eye /></Link>
-                                        <DeleteLink data={link} refetch={refetch} />
+                                        <DeleteLinkCategory data={link} refetch={refetch} />
                                     </TableCell>
                                 </TableRow>
 
@@ -122,6 +128,42 @@ export default function Data() {
                                         </TableCell>
                                     </TableRow>
                                 )}
+
+
+                                {link.links && link.links.length > 0 && (
+                                    expandedLinks[link.id] && (
+                                        <TableRow>
+                                            <TableCell colSpan="5" className="pl-10">
+                                                <Table className="min-w-full border-l border-blue-600">
+                                                    <TableHeader>
+                                                        <TableRow>
+                                                            <TableHead>No</TableHead>
+                                                            <TableHead>Judul</TableHead>
+                                                            <TableHead>View</TableHead>
+                                                            <TableHead>Tanggal Dibuat</TableHead>
+                                                            <TableHead>Aksi</TableHead>
+                                                        </TableRow>
+                                                    </TableHeader>
+                                                    <TableBody>
+                                                        {link.links.map((subLink, subIndex) => (
+                                                            <TableRow key={subLink.id}>
+                                                                <TableCell className="font-medium">{subIndex + 1}</TableCell>
+                                                                <TableCell className="font-medium">{subLink.title}</TableCell>
+                                                                <TableCell className="font-medium">0</TableCell>
+                                                                <TableCell className="font-medium">{new Date(subLink.createdAt).toLocaleString()}</TableCell>
+                                                                <TableCell className="flex gap-2">
+                                                                    <Button className="text-xs" onClick={() => handleEdit(subLink)}><Wrench /></Button>
+                                                                    <Link href={`/l/${subLink.short_url}`} target="_blank" className={buttonVariants()}><Eye /></Link>
+                                                                    <DeleteLink data={subLink} refetch={refetch} />
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))}
+                                                    </TableBody>
+                                                </Table>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+
                             </Fragment>
                         ))
                     )}

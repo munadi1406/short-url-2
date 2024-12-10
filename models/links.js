@@ -1,9 +1,9 @@
 import { sequelize } from '@/lib/sequelize';
 import { DataTypes } from 'sequelize';
 import User from './users';  // Impor model User
-import Url from './urls';
+import {Url} from './urls';
 
-const Link = sequelize.define('links', {
+export const Link = sequelize.define('links', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -46,8 +46,8 @@ const Link = sequelize.define('links', {
 });
 
 
-Link.belongsTo(User, { foreignKey: 'idUsers', onDelete: 'SET NULL' });
-Link.belongsTo(Url, { foreignKey: 'idurls', onDelete: 'SET NULL' });
+// Tambahkan ini setelah semua model sudah didefinisikan
+
+Link.belongsTo(User, { foreignKey: 'idUsers', onDelete: 'CASCADE' });
 
 
-export default Link;

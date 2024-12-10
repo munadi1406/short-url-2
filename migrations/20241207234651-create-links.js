@@ -17,7 +17,7 @@ module.exports = {
           model: 'urls', // Mengacu pada model 'urls'
           key: 'id',     // Menghubungkan dengan kolom 'id' di tabel 'urls'
         },
-        onDelete: 'SET NULL', // Jika URL yang terkait dihapus, maka idurls akan diset null
+        onDelete: 'CASCADE', // Jika URL yang terkait dihapus, maka idurls akan diset null
       },
       link: {
         type: Sequelize.STRING,

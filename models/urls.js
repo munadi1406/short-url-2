@@ -2,8 +2,9 @@ import { sequelize } from '@/lib/sequelize';
 import { DataTypes } from 'sequelize';
 import { nanoid } from 'nanoid';
 import User from './users';
+import {Link} from './links';
 
-const Url = sequelize.define('urls', {
+export const Url = sequelize.define('urls', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
@@ -32,9 +33,5 @@ const Url = sequelize.define('urls', {
   timestamps: true, // Secara otomatis menambahkan createdAt dan updatedAt
 });
 
-
-  Url.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
-
-
-
-export default Url;
+Url.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
+ 

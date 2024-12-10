@@ -34,3 +34,29 @@ export const POST = async (req) => {
         return jsonResponse({ msg: "Upload image failed" }, 404);
     }
 };
+export const DELETE = async (req) => {
+    // Mendapatkan nama file dari URL parameter (misalnya /uploads/filename.jpg)
+    const { searchParams } = new URL(req.url);
+   
+    const fileName = searchParams.get('path')
+    
+    if (!fileName) {
+        return jsonResponse({ msg: "File name not provided" }, 400);
+    }
+
+    const filePath = path.resolve(UPLOAD_DIR, fileName);
+
+    try {
+        // Cek apakah file ada
+        if (fs.existsSync(filePath)) {
+            // Hapus file
+            fs.unlinkSync(filePath);
+            return jsonResponse({ success: true, msg: "File deleted successfully" }, 200);
+        } else {
+            return jsonResponse({ msg: "File not found" }, 404);
+        }
+    } catch (error) {
+        console.error(error);
+        return jsonResponse({ msg: "Failed to delete file" }, 500);
+    }
+};

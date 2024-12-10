@@ -2,6 +2,7 @@ import { convertTitleToSlug } from "@/lib/converUrl";
 import { getUser } from "@/lib/dal";
 import { jsonResponse } from "@/lib/jsonResponse";
 import Article from "@/models/article";
+import { Op } from "sequelize";
 
 export async function POST(request) {
     const { content, title } = await request.json();

@@ -2,7 +2,20 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import React from 'react'
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import React, { Fragment, useEffect, useState } from 'react';
+import { Button, buttonVariants } from "../ui/button";
+import { useInView } from 'react-intersection-observer';
+import { Eye,Trash,Wrench} from "lucide-react"
+import Link from 'next/link';
 
 export default function Data() {
     const {
@@ -16,25 +29,81 @@ export default function Data() {
         queryKey: ['article'],
         queryFn: async ({ pageParam }) => {
             const response = await axios.get(`/api/article?${pageParam ? `lastCreatedAt=${pageParam}` : ''}`);
-      
+
             return response.data;
         },
         getNextPageParam: (lastPage) => lastPage.pagination.lastCreatedAt,
     });
+    const { ref, inView } = useInView({
+        triggerOnce: false, 
+        threshold: 0.5, 
+    });
+    useEffect(() => {
+        if (inView && hasNextPage) {
+            fetchNextPage();
+        }
+    }, [fetchNextPage, hasNextPage, inView]);
     return (
-        <div>
-           
-            {isLoading ? (
-                <div>
-                    <p colSpan="5">Memuat data...</p>
-                </div>
-            ) : (
-                // Menampilkan data dari setiap halaman
-                data?.pages?.flatMap((page) => page.data).map((article, index) => (
-                    <div key={index}>
-                        <a href={`/${article.slug}`} target="_blank" key={index}>{article.title}</a>
-                    </div>
-                ))
+        <div> 
+            <Link className={buttonVariants()} href={'/dashboard/article/create'}>Create Article</Link>
+            <Table className="overflow-scroll ">
+                <TableCaption>Daftar Artikel yang anda</TableCaption>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>No</TableHead>
+                        <TableHead>Title</TableHead>
+                        <TableHead>View</TableHead>
+                        <TableHead>Tanggal Dibuat</TableHead>
+                        <TableHead>Aksi</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {/* Jika sedang loading */}
+                    {isLoading ? (
+                        <TableRow>
+                            <TableCell colSpan="5">Memuat data...</TableCell>
+                        </TableRow>
+                    ) : (
+                        // Menampilkan data dari setiap halaman
+                        data?.pages?.flatMap((page) => page.data).map((article, index) => (
+                            <Fragment key={article.id}>
+                                <TableRow>
+                                    <TableCell className="font-medium">{index + 1}</TableCell>
+                                    <TableCell>
+                                        {article.title}
+                                    </TableCell>
+                                    <TableCell>0</TableCell>
+                                    <TableCell>{new Date(article.createdAt).toLocaleString()}</TableCell>
+                                    <TableCell className="flex flex-wrap gap-2 justify-center">
+                                        <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleEdit(article)}><Wrench/></Button>
+                                        <Link target='_blank' href={`/${article.slug}`} className={buttonVariants()}><Eye/></Link>
+                                        <Button variant="destructive" onClick={() => handleEdit(article)}><Trash/></Button>
+                                        {/* <DeleteLink data={link} refetch={refetch}/> */}
+                                    </TableCell>
+                                </TableRow>
+                            </Fragment>
+                        ))
+                    )}
+
+                    {/* Jika tidak ada data */}
+                    {!isLoading && data?.pages.length === 0 && (
+                        <TableRow>
+                            <TableCell colSpan="5">Tidak ada data tersedia</TableCell>
+                        </TableRow>
+                    )}
+                </TableBody>
+            </Table>
+
+            {/* Tombol untuk memuat lebih banyak data */}
+            {hasNextPage && (
+                <Button
+                    onClick={fetchNextPage}
+                    ref={ref}
+                    disabled={isFetchingNextPage}
+                    className="mt-4"
+                >
+                    {isFetchingNextPage ? "Memuat..." : "Muat Lebih Banyak"}
+                </Button>
             )}
         </div>
     )

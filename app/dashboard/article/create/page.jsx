@@ -53,9 +53,11 @@ const Page = () => {
 
   return (
     <div className='flex flex-col gap-2'>
-      <Button onClick={mutate} disabled={isPending}>Publish</Button>
-      <Textarea type="text" className="border-none text-3xl font-semibold active:border-none focus:border-none" placeholder={"Title"} onChange={(e) => setTitle(e.target.value)} value={title} />
-      <div className="prose lg:prose-lg prose-slate prose-img:rounded-md prose-img:shadow-lg prose-img:block prose-img:m-auto  w-full max-w-none">
+      <div className='bg-white w-full top-5 sticky p-2 z-10 rounded-md shadow-md'>
+        <Button onClick={mutate} disabled={isPending} className="w-full">Publish</Button>
+      </div>
+      <Textarea type="text" className=" !text-3xl font-semibold " placeholder={"Masukkan Judul Article"} onChange={(e) => setTitle(e.target.value)} value={title} />
+      <div className="border rounded-md prose lg:prose-lg prose-slate prose-img:rounded-md prose-img:shadow-lg prose-img:block prose-img:m-auto  w-full max-w-none">
         <Editor initialValue={value} onChange={setValue} />
       </div>
     </div>

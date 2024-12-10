@@ -86,8 +86,8 @@ export function LoginForm() {
             />
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <Button type="submit" className="w-full" disabled={loginMutation.isLoading}>
-            {loginMutation.isLoading ? "Logging in..." : "Login"}
+          <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
+            {loginMutation.isPending ? "Logging in..." : "Login"}
           </Button>
           <Button variant="outline" className="w-full">
             Login with Google

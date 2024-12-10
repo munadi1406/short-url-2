@@ -6,8 +6,8 @@ import { Button } from "../ui/button"
 import axios from "axios"
 import { Trash } from "lucide-react"
 
-export default function DeleteLink({ data,refetch }) {
-
+export default function DeleteLinkCategory({ data,refetch }) {
+    
     const {mutate,isPending} = useMutation({
         mutationFn: async (formData) => {
             
