@@ -140,7 +140,7 @@ export async function GET(req) {
 
         const lastCreatedAt = searchParams.get('lastCreatedAt') || null;  // Mendapatkan createdAt dari item terakhir yang dimuat sebelumnya
         const category = searchParams.get('category');  // Mendapatkan kategori (null atau true)
-
+        
         const whereCondition = {};
 
         // Menentukan filter berdasarkan kategori dan apakah itu berasal dari Url atau Link
@@ -167,7 +167,7 @@ export async function GET(req) {
             order: [['createdAt', 'DESC']],  // Urutkan berdasarkan createdAt secara descending
             limit: pageSize,  // Batasi jumlah item yang diambil per halaman
         };
-        console.log({queryOptions} )
+     
 
         if (category === 'true') {
             // Jika kategori adalah 'true', kita query Url dan include Link
@@ -264,7 +264,7 @@ export async function DELETE(req) {
             idUsers = checkOwnerLink.idUsers
         }
         const checkOwnerUrls = await Url.findByPk(linkId, { attributes: ['userid'] })
-        console.log(checkOwnerUrls)
+    
         if (checkOwnerUrls) {
             idUsers = checkOwnerUrls.userid
         }

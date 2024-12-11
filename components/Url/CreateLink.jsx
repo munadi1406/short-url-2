@@ -36,7 +36,7 @@ export default function CreateLink() {
 
         const handlePositionOpenButton = () => {
             const pageHeight = document.documentElement.scrollHeight;
-            console.log({ pageHeight }) // Mendapatkan tinggi halaman
+         
             const positionFromTop = pageHeight * 0.05; // 5% dari tinggi halaman
 
             setTopOpenLink(pageHeight + positionFromTop);
@@ -80,21 +80,18 @@ export default function CreateLink() {
     const { mutate, isPending } = useMutation({
         mutationFn: async (slug) => {
             const getLink = await axios.get(`/api/shorten/${slug}`)
-            console.log("running 2")
-            console.log(getLink.data)
+         
             return getLink.data
         },
         onSuccess: (data) => {
             window.location.href = data.url
 
         },
-        onError: (error) => {
-            console.log(error)
-        }
+        
     })
 
     const handleClick = () => {
-        console.log("running");
+       
         mutate(slug)
     }
 
@@ -127,7 +124,7 @@ export default function CreateLink() {
                         className="flex justify-center left-0 p-4 w-full mb-4 absolute"
                         style={{ top: `${topOpenLink}px` }}
                     >
-                        {console.log(topOpenLink)}
+                     
                         <Button
                             onClick={handleClick}
                             disabled={isOpenButtonDisabled || isPending}

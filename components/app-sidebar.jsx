@@ -101,25 +101,13 @@ const data = {
       ],
     },
     {
-      title: "Settings",
+      title: "Telegram",
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "Chanel",
+          url: "/dashboard/telegram",
         },
       ],
     },

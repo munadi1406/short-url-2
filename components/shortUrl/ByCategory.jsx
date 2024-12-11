@@ -18,7 +18,7 @@ import { Button, buttonVariants } from "../ui/button";
 import EditForm from "./EditForm";
 import DeleteLink from "./DeleteLink";
 import Link from "next/link";
-import { Eye, Wrench } from "lucide-react";
+import { Eye, SendHorizontal, Wrench } from "lucide-react";
 import {
     Collapsible,
     CollapsibleContent,
@@ -27,7 +27,7 @@ import {
 import DeleteLinkCategory from "./DeleteLinkCategory";
 
 
-export default function ByCateory() {
+export default function ByCateory({handleClickSendMessage}) {
     const [expandedLinks, setExpandedLinks] = useState({});
 
     // Fungsi untuk toggle sub-link
@@ -116,6 +116,7 @@ export default function ByCateory() {
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
                                         <Button onClick={() => handleEdit(link)}><Wrench /></Button>
                                         <Link href={`/link/${link.short_url}`} target="_blank" className={buttonVariants()}><Eye /></Link>
+                                        <Button onClick={() => handleClickSendMessage({title:link.title,link:`link/${link.short_url}`})} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
                                         <DeleteLinkCategory data={link} refetch={refetch} />
                                     </TableCell>
                                 </TableRow>
@@ -154,6 +155,7 @@ export default function ByCateory() {
                                                                 <TableCell className="flex gap-2">
                                                                     <Button className="text-xs" onClick={() => handleEdit(subLink)}><Wrench /></Button>
                                                                     <Link href={`/l/${subLink.short_url}`} target="_blank" className={buttonVariants()}><Eye /></Link>
+                                                                    <Button onClick={() => handleClickSendMessage({title:link.subLink,link:`link/${subLink.short_url}`})} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
                                                                     <DeleteLink data={subLink} refetch={refetch} />
                                                                 </TableCell>
                                                             </TableRow>

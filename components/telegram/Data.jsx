@@ -1,7 +1,8 @@
-'use client'
+/* eslint-disable react-hooks/exhaustive-deps */
+'use client';
 
-import { useInfiniteQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { useInfiniteQuery } from "@tanstack/react-query";
+import axios from "axios";
 import {
     Table,
     TableBody,
@@ -13,11 +14,12 @@ import {
 } from "@/components/ui/table";
 import React, { Fragment, useEffect, useState } from 'react';
 import { Button, buttonVariants } from "../ui/button";
-import { useInView } from 'react-intersection-observer';
-import { Eye, Trash, Wrench } from "lucide-react"
-import Link from 'next/link';
-import DeleteArticle from './DeleteArticle';
-
+import EditForm from "./EditForm";
+import DeleteChanel from "./DeleteChanel";
+import {  Wrench } from "lucide-react";
+import FormCreate from "./FormCreate";
+import SendMessage from "./SendMessage";
+ 
 export default function Data() {
     const {
         data,
@@ -27,33 +29,42 @@ export default function Data() {
         isFetchingNextPage,
         refetch
     } = useInfiniteQuery({
-        queryKey: ['article'],
+        queryKey: ['links'],
         queryFn: async ({ pageParam }) => {
-            const response = await axios.get(`/api/article?${pageParam ? `lastCreatedAt=${pageParam}` : ''}`);
-
+            const response = await axios.get(`/api/telegram?${pageParam ? `lastCreatedAt=${pageParam}` : ''}`);
             return response.data;
         },
         getNextPageParam: (lastPage) => lastPage.pagination.lastCreatedAt,
     });
-    const { ref, inView } = useInView({
-        triggerOnce: false,
-        threshold: 0.5,
-    });
-    useEffect(() => {
-        if (inView && hasNextPage) {
-            fetchNextPage();
+
+
+    // State untuk data saat ini dan mode edit
+    const [currentData, setCurrentData] = useState({});
+    const [isEdit, setIsEdit] = useState(false);
+
+    // Fungsi untuk mengatur mode edit
+    const handleEdit = (data) => {
+        if (isEdit && currentData.id === data.id) {
+            setCurrentData({});
+            setIsEdit(false);
+        } else {
+            setCurrentData(data);
+            setIsEdit(true);
         }
-    }, [fetchNextPage, hasNextPage, inView]);
+    };
+
+
     return (
-        <div>
-            <Link className={buttonVariants()} href={'/dashboard/article/create'}>Create Article</Link>
+        <div >
+            <FormCreate refetch={refetch}/>
+            <SendMessage channels={data?.pages?.flatMap((page) => page.data)}/>
             <Table className="overflow-scroll ">
-                <TableCaption>Daftar Artikel yang anda</TableCaption>
+                <TableCaption>Daftar Chanel yang Tersedia</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>No</TableHead>
                         <TableHead>Title</TableHead>
-                        <TableHead>View</TableHead>
+                        <TableHead>Id Chanel</TableHead>
                         <TableHead>Tanggal Dibuat</TableHead>
                         <TableHead>Aksi</TableHead>
                     </TableRow>
@@ -66,22 +77,33 @@ export default function Data() {
                         </TableRow>
                     ) : (
                         // Menampilkan data dari setiap halaman
-                        data?.pages?.flatMap((page) => page.data).map((article, index) => (
-                            <Fragment key={article.id}>
+                        data?.pages?.flatMap((page) => page.data).map((telegram, index) => (
+                            <Fragment key={telegram.id}>
                                 <TableRow>
                                     <TableCell className="font-medium">{index + 1}</TableCell>
                                     <TableCell>
-                                        {article.title}
+
+                                        {telegram.title}
+
                                     </TableCell>
                                     <TableCell>0</TableCell>
-                                    <TableCell>{new Date(article.createdAt).toLocaleString()}</TableCell>
+                                    <TableCell>{new Date(telegram.createdAt).toLocaleString()}</TableCell>
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
-                                        <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleEdit(article)}><Wrench /></Button>
-                                        <Link target='_blank' href={`/${article.slug}`} className={buttonVariants()}><Eye /></Link>
 
-                                        <DeleteArticle data={article} refetch={refetch} />
+                                        <Button onClick={() => handleEdit(telegram)} ><Wrench /></Button>
+
+                                        <DeleteChanel data={telegram} refetch={refetch} />
                                     </TableCell>
                                 </TableRow>
+
+                                {/* Menampilkan form edit jika sedang dalam mode edit */}
+                                {currentData?.id === telegram.id && isEdit && (
+                                    <TableRow>
+                                        <TableCell colSpan="5">
+                                            <EditForm data={currentData} />
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                             </Fragment>
                         ))
                     )}
@@ -99,7 +121,7 @@ export default function Data() {
             {hasNextPage && (
                 <Button
                     onClick={fetchNextPage}
-                    ref={ref}
+                   
                     disabled={isFetchingNextPage}
                     className="mt-4"
                 >
@@ -107,5 +129,5 @@ export default function Data() {
                 </Button>
             )}
         </div>
-    )
+    );
 }

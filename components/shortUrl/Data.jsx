@@ -18,10 +18,13 @@ import { Button, buttonVariants } from "../ui/button";
 import EditForm from "./EditForm";
 import DeleteLink from "./DeleteLink";
 import Link from "next/link";
-import { Eye, Wrench } from "lucide-react";
+import { Eye, SendHorizontal, Wrench } from "lucide-react";
 import ByCategory from './ByCategory'
+import SendMessage from "./SendMessage";
+
 
 export default function Data() {
+    const [openMessage, setOpenMessage] = useState(false);
     const {
         data,
         fetchNextPage,
@@ -59,6 +62,11 @@ export default function Data() {
         }
     };
 
+    const handleClickSendMessage = (data) => {
+        setOpenMessage(!openMessage)
+        setCurrentData(data)
+    }
+
     // // Efek samping untuk memuat halaman berikutnya saat observer terlihat
     // useEffect(() => {
     //     if (inView && hasNextPage) {
@@ -69,8 +77,8 @@ export default function Data() {
     return (
         <div >
 
-            <ByCategory />
-
+            <SendMessage isOpen={openMessage} setIsOpen={setOpenMessage} datas={currentData} />
+            <ByCategory handleClickSendMessage={handleClickSendMessage} />
             <Table className="overflow-scroll ">
                 <TableCaption>Daftar Link yang Tersedia</TableCaption>
                 <TableHeader>
@@ -107,9 +115,10 @@ export default function Data() {
                                     <TableCell>0</TableCell>
                                     <TableCell>{new Date(link.createdAt).toLocaleString()}</TableCell>
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
-                                        {console.log(link)}
+
                                         <Button onClick={() => handleEdit(link)} ><Wrench /></Button>
                                         <Link href={`/link/${link.short_url}`} target="_blank" className={buttonVariants()}><Eye /></Link>
+                                        <Button onClick={() => handleClickSendMessage({ title: link.title, link: `link/${link.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
                                         <DeleteLink data={link} refetch={refetch} />
                                     </TableCell>
                                 </TableRow>
