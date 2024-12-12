@@ -18,16 +18,18 @@ import { Button, buttonVariants } from "../ui/button";
 import EditForm from "./EditForm";
 import DeleteLink from "./DeleteLink";
 import Link from "next/link";
-import { Eye, SendHorizontal, Wrench } from "lucide-react";
+import { Eye, Plus, SendHorizontal, Wrench } from "lucide-react";
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import DeleteLinkCategory from "./DeleteLinkCategory";
+import CopyButton from "../CopyButton";
+import DialogAdd from "./DialogAdd";
 
 
-export default function ByCateory({handleClickSendMessage}) {
+export default function ByCateory({ handleClickSendMessage }) {
     const [expandedLinks, setExpandedLinks] = useState({});
 
     // Fungsi untuk toggle sub-link
@@ -73,11 +75,15 @@ export default function ByCateory({handleClickSendMessage}) {
             setIsEdit(true);
         }
     };
-
-
+    const [isAdd,setIsAdd] = useState(false)
+    const handleAdd = (e)=>{
+        setCurrentData(e)
+        setIsAdd(true)
+    }
 
     return (
         <div >
+            <DialogAdd refetch={refetch} isOpen={isAdd} setIsOpen={setIsAdd} currentData={currentData}/>
             <Table className="overflow-scroll ">
                 <TableCaption>Daftar Link yang Tersedia</TableCaption>
                 <TableHeader>
@@ -114,9 +120,11 @@ export default function ByCateory({handleClickSendMessage}) {
                                     <TableCell>0</TableCell>
                                     <TableCell>{new Date(link.createdAt).toLocaleString()}</TableCell>
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
+                                        <Button className="text-xs bg-slate-900" onClick={() => handleAdd(link)}><Plus /> </Button>
                                         <Button onClick={() => handleEdit(link)}><Wrench /></Button>
-                                        <Link href={`/link/${link.short_url}`} target="_blank" className={buttonVariants()}><Eye /></Link>
-                                        <Button onClick={() => handleClickSendMessage({title:link.title,link:`link/${link.short_url}`})} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
+                                        <Link href={`/l/${link.short_url}`} target="_blank" className={`${buttonVariants()} bg-yellow-400 hover:bg-yellow-500`}><Eye /></Link>
+                                        <Button onClick={() => handleClickSendMessage({ title: link.title, link: `l/${link.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
+                                        <CopyButton textToCopy={`${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${link.short_url}`} />
                                         <DeleteLinkCategory data={link} refetch={refetch} />
                                     </TableCell>
                                 </TableRow>
@@ -153,9 +161,11 @@ export default function ByCateory({handleClickSendMessage}) {
                                                                 <TableCell className="font-medium">0</TableCell>
                                                                 <TableCell className="font-medium">{new Date(subLink.createdAt).toLocaleString()}</TableCell>
                                                                 <TableCell className="flex gap-2">
+
                                                                     <Button className="text-xs" onClick={() => handleEdit(subLink)}><Wrench /></Button>
-                                                                    <Link href={`/l/${subLink.short_url}`} target="_blank" className={buttonVariants()}><Eye /></Link>
-                                                                    <Button onClick={() => handleClickSendMessage({title:link.subLink,link:`link/${subLink.short_url}`})} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
+                                                                    <Link href={`/l/${subLink.short_url}`} target="_blank" className={`${buttonVariants()} bg-yellow-400 hover:bg-yellow-500`}><Eye /></Link>
+                                                                    <Button onClick={() => handleClickSendMessage({ title: link.subLink, link: `l/${subLink.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
+                                                                    <CopyButton textToCopy={`${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${subLink.short_url}`} />
                                                                     <DeleteLink data={subLink} refetch={refetch} />
                                                                 </TableCell>
                                                             </TableRow>

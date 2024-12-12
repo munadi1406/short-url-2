@@ -28,7 +28,7 @@ export default async function layout({ children }) {
                     </div>
                 </header>
                 <div className="w-full grid grid-cols-1 relative">
-                    <div className="p-2 border border-gray-300 shadow-md rounded-md m-2">
+                    <div className="p-2">
                         {children}
                     </div>
                 </div>

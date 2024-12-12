@@ -54,7 +54,7 @@ export default function SignupForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="px-2 py-4 shadow-md rounded-md border border-gray-300">
       <div>
         <Label htmlFor="name">Name</Label>
         <Input

@@ -21,6 +21,8 @@ import Link from "next/link";
 import { Eye, SendHorizontal, Wrench } from "lucide-react";
 import ByCategory from './ByCategory'
 import SendMessage from "./SendMessage";
+import FormCreate from "./FormCreate";
+import CopyButton from "../CopyButton";
 
 
 export default function Data() {
@@ -75,86 +77,92 @@ export default function Data() {
     // }, [inView]);
 
     return (
-        <div >
-
+        <div className="space-y-4">
             <SendMessage isOpen={openMessage} setIsOpen={setOpenMessage} datas={currentData} />
-            <ByCategory handleClickSendMessage={handleClickSendMessage} />
-            <Table className="overflow-scroll ">
-                <TableCaption>Daftar Link yang Tersedia</TableCaption>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>No</TableHead>
-                        <TableHead>Judul</TableHead>
-                        <TableHead>View</TableHead>
-                        <TableHead>Tanggal Dibuat</TableHead>
-                        <TableHead>Aksi</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {/* Jika sedang loading */}
-                    {isLoading ? (
+            <div className="px-2 py-4 shadow-md rounded-md border border-gray-300">
+                <FormCreate />
+                <ByCategory handleClickSendMessage={handleClickSendMessage} />
+            </div>
+            <div className="px-2 py-4 shadow-md rounded-md border border-gray-300">
+                <h3 className="text-lg font-semibold text-gray-700">Tanpa Kategori</h3>
+                <Table className="overflow-scroll ">
+                    <TableCaption>Daftar Link yang Tersedia</TableCaption>
+                    <TableHeader>
                         <TableRow>
-                            <TableCell colSpan="5">Memuat data...</TableCell>
+                            <TableHead>No</TableHead>
+                            <TableHead>Judul</TableHead>
+                            <TableHead>View</TableHead>
+                            <TableHead>Tanggal Dibuat</TableHead>
+                            <TableHead>Aksi</TableHead>
                         </TableRow>
-                    ) : (
-                        // Menampilkan data dari setiap halaman
-                        data?.pages?.flatMap((page) => page.data).map((link, index) => (
-                            <Fragment key={link.id}>
-                                <TableRow>
-                                    <TableCell className="font-medium">{index + 1}</TableCell>
-                                    <TableCell>
-                                        <a
-                                            className="hover:text-blue-600 hover:underline"
-                                            href={link.link}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            {link.title}
-                                        </a>
-                                    </TableCell>
-                                    <TableCell>0</TableCell>
-                                    <TableCell>{new Date(link.createdAt).toLocaleString()}</TableCell>
-                                    <TableCell className="flex flex-wrap gap-2 justify-center">
-
-                                        <Button onClick={() => handleEdit(link)} ><Wrench /></Button>
-                                        <Link href={`/link/${link.short_url}`} target="_blank" className={buttonVariants()}><Eye /></Link>
-                                        <Button onClick={() => handleClickSendMessage({ title: link.title, link: `link/${link.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
-                                        <DeleteLink data={link} refetch={refetch} />
-                                    </TableCell>
-                                </TableRow>
-
-                                {/* Menampilkan form edit jika sedang dalam mode edit */}
-                                {currentData?.id === link.id && isEdit && (
+                    </TableHeader>
+                    <TableBody>
+                        {/* Jika sedang loading */}
+                        {isLoading ? (
+                            <TableRow>
+                                <TableCell colSpan="5">Memuat data...</TableCell>
+                            </TableRow>
+                        ) : (
+                            // Menampilkan data dari setiap halaman
+                            data?.pages?.flatMap((page) => page.data).map((link, index) => (
+                                <Fragment key={link.id}>
                                     <TableRow>
-                                        <TableCell colSpan="5">
-                                            <EditForm data={currentData} />
+                                        <TableCell className="font-medium">{index + 1}</TableCell>
+                                        <TableCell>
+                                            <a
+                                                className="hover:text-blue-600 hover:underline"
+                                                href={link.link}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                            >
+                                                {link.title}
+                                            </a>
+                                        </TableCell>
+                                        <TableCell>0</TableCell>
+                                        <TableCell>{new Date(link.createdAt).toLocaleString()}</TableCell>
+                                        <TableCell className="flex flex-wrap gap-2 justify-center">
+
+                                            <Button onClick={() => handleEdit(link)} ><Wrench /></Button>
+                                            <Link href={`/l/${link.short_url}`} target="_blank" className={buttonVariants()}><Eye /></Link>
+                                            <Button onClick={() => handleClickSendMessage({ title: link.title, link: `l/${link.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
+                                            <CopyButton textToCopy={`${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${link.short_url}`}/>
+                                            <DeleteLink data={link} refetch={refetch} />
                                         </TableCell>
                                     </TableRow>
-                                )}
-                            </Fragment>
-                        ))
-                    )}
 
-                    {/* Jika tidak ada data */}
-                    {!isLoading && data?.pages.length === 0 && (
-                        <TableRow>
-                            <TableCell colSpan="5">Tidak ada data tersedia</TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+                                    {/* Menampilkan form edit jika sedang dalam mode edit */}
+                                    {currentData?.id === link.id && isEdit && (
+                                        <TableRow>
+                                            <TableCell colSpan="5">
+                                                <EditForm data={currentData} />
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </Fragment>
+                            ))
+                        )}
 
-            {/* Tombol untuk memuat lebih banyak data */}
-            {hasNextPage && (
-                <Button
-                    onClick={fetchNextPage}
-                    ref={ref}
-                    disabled={isFetchingNextPage}
-                    className="mt-4"
-                >
-                    {isFetchingNextPage ? "Memuat..." : "Muat Lebih Banyak"}
-                </Button>
-            )}
+                        {/* Jika tidak ada data */}
+                        {!isLoading && data?.pages.length === 0 && (
+                            <TableRow>
+                                <TableCell colSpan="5">Tidak ada data tersedia</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+
+                {/* Tombol untuk memuat lebih banyak data */}
+                {hasNextPage && (
+                    <Button
+                        onClick={fetchNextPage}
+                        ref={ref}
+                        disabled={isFetchingNextPage}
+                        className="mt-4"
+                    >
+                        {isFetchingNextPage ? "Memuat..." : "Muat Lebih Banyak"}
+                    </Button>
+                )}
+            </div>
         </div>
     );
 }

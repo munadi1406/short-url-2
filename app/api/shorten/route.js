@@ -26,7 +26,7 @@ async function getTitleFromUrl(url) {
 
 export async function POST(req) {
     const transaction = await sequelize.transaction(); // Mulai transaksi
-    const { title, link } = await req.json();
+    const { title, link,idUrls,type } = await req.json();
     const { id } = await getUser();
     try {
         // Ambil data dari body request
@@ -36,7 +36,7 @@ export async function POST(req) {
         const links = link.split(/[\n,]+/).map((l) => l.trim()).filter(Boolean);
 
         // Jika hanya satu link, langsung masukkan ke tabel `links`
-        if (links.length === 1) {
+        if (type === 'single') {
             const singleLink = links[0];
 
             try {
@@ -47,22 +47,22 @@ export async function POST(req) {
                 // Simpan link ke tabel 'links'
                 const linkEntry = await Link.create(
                     {
-                        idurls: null, // Tidak terkait dengan URL utama
+                        idurls: idUrls ?? null, // Tidak terkait dengan URL utama
                         link: singleLink,
                         title: linkTitle,
                         short_url: shortUrl,
                         idUsers: userId || null, // Hubungkan ke user jika ada
                     },
-                    { transaction }
+                    { transaction,attributes:['short_url'] }
                 );
 
                 // Commit transaksi
                 await transaction.commit();
 
                 return NextResponse.json({
-                    message: 'Success',
+                    msg: 'Link Berhasil Ditambahkan',
                     data: {
-                        links: [linkEntry],
+                        link: `${process.env.ENDPOINT_URL}l/${linkEntry.short_url}`,
                     },
                 });
             } catch (error) {
@@ -70,7 +70,7 @@ export async function POST(req) {
                 throw new Error('Invalid single link');
             }
         }
-
+        console.log('tipe link bulk jalan')
         // Jika ada lebih dari satu link, simpan ke tabel `urls` dan `links`
         const urlEntry = await Url.create(
             {
@@ -81,7 +81,7 @@ export async function POST(req) {
             { transaction }
         );
 
-        const linkEntries = await Promise.all(
+        await Promise.all(
             links.map(async (singleLink) => {
                 try {
                     new URL(singleLink); // Validasi URL
@@ -97,8 +97,9 @@ export async function POST(req) {
                             short_url: shortUrl,
                             idUsers: userId || null, // Hubungkan ke user jika ada
                         },
-                        { transaction }
+                        { transaction}
                     );
+                 
                 } catch (error) {
                     console.error(`Invalid URL: ${singleLink}`, error.message);
                     return null; // Abaikan link yang tidak valid
@@ -107,15 +108,15 @@ export async function POST(req) {
         );
 
         // Filter link yang berhasil disimpan
-        const savedLinks = linkEntries.filter(Boolean);
+        
 
         // Commit transaksi
         await transaction.commit();
 
         return jsonResponse({
+            msg:"Link Berhasil Disimpan",
             data: {
-                url: urlEntry,
-                links: savedLinks,
+                link: `${process.env.ENDPOINT_URL}l/${urlEntry.short_url}`,
             },
         }, 200)
     } catch (error) {

@@ -45,7 +45,7 @@ export default function Data() {
         }
     }, [fetchNextPage, hasNextPage, inView]);
     return (
-        <div>
+        <div className='px-2 py-4 shadow-md rounded-md border border-gray-300'>
             <Link className={buttonVariants()} href={'/dashboard/article/create'}>Create Article</Link>
             <Table className="overflow-scroll ">
                 <TableCaption>Daftar Artikel yang anda</TableCaption>

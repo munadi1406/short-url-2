@@ -1,43 +1,74 @@
+import TelegramBot from "node-telegram-bot-api";
 import axios from "axios";
+import fs from "fs";
+import path from "path";
 
+const bot = new TelegramBot(process.env.API_KEY_TELEGRAM, { polling: false });
 
 export async function POST(req) {
     try {
-        const { message, hyperlinks, channelIds } = await req.json();
-
+        const { message, hyperlinks, channelIds, poster_path } = await req.json();
+        console.log(path.basename(poster_path))
         // Validasi input
         if (!message || !Array.isArray(channelIds) || channelIds.length === 0) {
             return new Response(JSON.stringify({ msg: "Pesan dan daftar channel harus diisi" }), { status: 400 });
         }
 
+        // Tentukan path file lokal
+        const localImagePath = path.resolve("public/uploads/images", path.basename(poster_path));
+
+        // Pastikan folder "images" ada
+        const imagesDir = path.resolve("public/uploads/images");
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+
+        let photoBuffer;
+        if (fs.existsSync(localImagePath)) {
+            // Jika file sudah ada, baca dari lokal
+            photoBuffer = fs.readFileSync(localImagePath);
+        } else {
+            // Jika file belum ada, unduh dan simpan ke lokal
+            try {
+                const imageResponse = await axios.get(`${process.env.ENDPOINT_TMBD_IMAGE}/original${poster_path}`, {
+                    responseType: "arraybuffer",
+                });
+                photoBuffer = Buffer.from(imageResponse.data);
+                fs.writeFileSync(localImagePath, photoBuffer); // Simpan ke lokal
+            } catch (error) {
+                console.error("Error downloading image:", error.message);
+                return new Response(JSON.stringify({ msg: "Gagal mengunduh gambar", error: error.message }), {
+                    status: 500,
+                });
+            }
+        }
+
         // Kirim pesan ke setiap channel yang dipilih
         const responses = await Promise.all(
             channelIds.map(async (chat_id) => {
-                const url = `${process.env.ENDPOINT_TELEGRAM_API}${process.env.API_KEY_TELEGRAM}/sendMessage`;
-
-                let payload = {
-                    chat_id,
-                    text: message,
-                    parse_mode: "HTML", // Mendukung HTML formatting dalam pesan
-                };
-
-                // Jika ada hyperlink, tambahkan inline keyboard
-                if (hyperlinks) {
-                    payload.reply_markup = {
-                        inline_keyboard: [
-                            [
-                                {
-                                    text: "Open", // Teks tombol
-                                    url: hyperlinks, // URL yang akan dibuka saat tombol diklik
-                                },
-                            ],
-                        ],
-                    };
-                }
-
                 try {
-                    const response = await axios.post(url, payload);
-                    return { chat_id, success: true, response: response.data };
+                    const options = {
+                        caption: message,
+                        parse_mode: "HTML", // Mendukung HTML formatting dalam pesan
+                    };
+
+                    // Jika ada hyperlink, tambahkan inline keyboard
+                    if (hyperlinks) {
+                        options.reply_markup = {
+                            inline_keyboard: [
+                                [
+                                    {
+                                        text: "Open", // Teks tombol
+                                        url: hyperlinks, // URL yang akan dibuka saat tombol diklik
+                                    },
+                                ],
+                            ],
+                        };
+                    }
+                    console.log(console.log(localImagePath))
+                    await bot.sendPhoto(chat_id, localImagePath, options);
+
+                    return { chat_id, success: true };
                 } catch (error) {
                     console.error(`Failed to send message to chat_id ${chat_id}:`, error.message);
                     return { chat_id, success: false, error: error.message };
@@ -66,4 +97,3 @@ export async function POST(req) {
         });
     }
 }
-

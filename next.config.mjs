@@ -1,6 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     serverExternalPackages: ['sequelize'],
+    images: {
+        remotePatterns: [
+          {
+            protocol: 'https',
+            hostname: 'image.tmdb.org',
+            pathname: '/t/p/**', // Mendukung semua path dari TMDb
+          },
+        ],
+      },
     async rewrites() {
         return [
             {

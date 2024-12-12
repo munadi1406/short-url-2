@@ -52,7 +52,7 @@ const Page = () => {
 
 
   return (
-    <div className='flex flex-col gap-2'>
+    <div className='flex flex-col gap-2 px-2 py-4 shadow-md rounded-md border border-gray-300'>
       <div className='bg-white w-full top-5 sticky p-2 z-10 rounded-md shadow-md'>
         <Button onClick={mutate} disabled={isPending} className="w-full">Publish</Button>
       </div>

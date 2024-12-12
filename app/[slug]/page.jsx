@@ -123,7 +123,7 @@ export default async function Page({ params }) {
   const result = await JSONToHTML(data.content, true);
 
   return (
-    <div className="min-h-screen py-6">
+    <div className="min-h-screen py-6 px-4">
       <CreateLink />
       <div className="md:w-[70vw] w-full mx-auto">
         <article className="prose lg:prose-lg prose-h2:m-auto prose-h1:my-4 prose-h3:m-auto prose-p:my-4 prose-slate prose-img:rounded-md prose-img:shadow-lg prose-img:block prose-img:m-auto w-full max-w-none">

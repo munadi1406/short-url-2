@@ -103,7 +103,7 @@ export default function CreateLink() {
 
     return (
         <>
-            <div className="bg-red-600 flex flex-col justify-between p-8">
+            <div className="bg-green-600 flex flex-col justify-between p-8">
                 {/* Tombol Create Link */}
                 {showCreateButton && (
                     <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-full text-center">

@@ -15,21 +15,47 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
+import { Skeleton } from "../ui/skeleton";
 
-export default function SendMessage({  isOpen, setIsOpen, datas }) {
+export default function SendMessage({ isOpen, setIsOpen, datas }) {
 
     const [formData, setFormData] = useState({
         message: '',
         hyperlinks: '',
-        channelIds: [], // Untuk menyimpan ID channel yang dipilih
+        channelIds: [],
     });
     const { toast } = useToast();
-   
+    const handleClick = async (data) => {
+        const detail = await axios.get(`/api/movie/detail?id=${data.id}&type=${data.media_type}`);
+        const datas = detail.data.data;
+     
+
+        const genres = datas.genres.map(genre => genre.name).join(', ');
+
+        // Define Unicode emojis or other icons for better presentation
+        const titleIcon = "🎬";
+        const ratingIcon = "⭐";
+        const genreIcon = "🎭";
+        const overviewIcon = "📜";
+
+        // Format message with icons and new line breaks for better readability
+        setFormData((prev) => ({
+            ...prev,
+            message: `${titleIcon} *Title*: ${data.name ? data.name : data?.title}\n` +
+                `${ratingIcon} *Rating*: ${data.vote_average} / ${data.vote_count} votes\n` +
+                `${genreIcon} *Genre*: ${genres}\n\n` +
+                `${overviewIcon} *Overview*: \n${data.overview}`,
+            poster_path: data.poster_path,
+        }));
+    };
+
     useEffect(() => {
         if (datas) {
             setFormData((prev) => ({
                 ...prev,
                 hyperlinks: `${process.env.NEXT_PUBLIC_ENDPOINT_URL}${datas.link}`,
+                poster_path: datas.poster_path
             }));
         }
     }, [datas]);
@@ -52,6 +78,7 @@ export default function SendMessage({  isOpen, setIsOpen, datas }) {
             return {
                 ...prev,
                 channelIds: updatedChannelIds,
+
             };
         });
     };
@@ -59,11 +86,7 @@ export default function SendMessage({  isOpen, setIsOpen, datas }) {
     const { mutate, isPending } = useMutation({
         mutationFn: async (e) => {
             e.preventDefault();
-            const response = await axios.post('/api/telegram/send-message', {
-                message: formData.message,
-                hyperlinks: formData.hyperlinks,
-                channelIds: formData.channelIds,
-            });
+            const response = await axios.post('/api/telegram/send-message', formData);
             return response.data;
         },
         onSuccess: (data) => {
@@ -87,62 +110,137 @@ export default function SendMessage({  isOpen, setIsOpen, datas }) {
             return allChanel.data
         }
     })
+    const [query, setQuery] = useState("");
+    const movieData = useQuery({
+        queryKey: [`movie-${query}`], queryFn: async () => {
+            const movie = await axios.get(`/api/movie?search=${query}`)
+            return movie.data
+        },
+        enabled: query.length > 3
+    })
+    let searchTimeout;
+    const search = (e) => {
+        const query = e.target.value;
+   
+        if (query.length > 3) {
+            // setIsSearch(true);
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            searchTimeout = setTimeout(async () => {
+                setQuery(query);
+            }, 2000);
+        } else {
+          
+            setQuery("");
+        
+        }
+    };
+    useEffect(() => {
+        
+    }, [query])
 
 
     return (
         <>
-
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-                <DialogContent>
+                <DialogContent className="min-w-[80vw] max-h-[90vh] overflow-auto">
                     <DialogHeader>
                         <DialogTitle>Kirim Pesan ke Channel Telegram</DialogTitle>
                         <DialogDescription>
                             Isi detail pesan dan pilih channel yang ingin dikirimi pesan.
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="p-2 w-full">
-                        <form
-                            className="rounded-md flex gap-2 flex-col"
-                            onSubmit={mutate}
-                        >
-                            <div>
-                                <Label htmlFor="message">Pesan</Label>
-                                <Textarea
-                                    name="message"
-                                    id="message"
-                                    required
-                                    placeholder="Masukkan pesan"
-                                    value={formData.message}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="hyperlinks">Hyperlink (Opsional)</Label>
-                                <Input
-                                    name="hyperlinks"
-                                    id="hyperlinks"
-                                    placeholder="Masukkan hyperlink (Opsional)"
-                                    value={formData.hyperlinks}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div>
-                                <Label>Channel</Label>
-                                <div className="flex flex-col gap-2">
-                                    {isLoading ? 'Loading....' : data?.data?.map((channel) => (
-                                        <label key={channel.id_chanel} className="flex items-center gap-2">
-                                            <input
-                                                type="checkbox"
-                                                value={channel.id_chanel}
-                                                onChange={handleChannelSelection}
-                                            />
-                                            {channel.title}
-                                        </label>
-                                    ))}
+                    <div className="grid md:grid-cols-2 grid-cols-1 gap-2">
+                        <div className="p-2 w-full h-full md:order-1 order-2">
+                            <form
+                                className="rounded-md flex gap-2 flex-col h-full"
+                                onSubmit={mutate}
+                            >
+                                <div>
+                                    <Label htmlFor="message">Pesan</Label>
+                                    <Textarea
+                                        name="message"
+                                        id="message"
+                                        required
+                                        placeholder="Masukkan pesan"
+                                        value={formData.message}
+                                        onChange={handleChange}
+                                    />
                                 </div>
+                                <div>
+                                    <Label htmlFor="hyperlinks">Hyperlink (Opsional)</Label>
+                                    <Input
+                                        name="hyperlinks"
+                                        id="hyperlinks"
+                                        placeholder="Masukkan hyperlink (Opsional)"
+                                        value={formData.hyperlinks}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                                <div>
+                                    <Label>Channel</Label>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {isLoading ? 'Loading....' : data?.data?.map((channel, i) => (
+                                            <div key={i} className="flex gap-2 items-start">
+                                                <input
+                                                    id={channel.id_chanel}
+                                                    type="checkbox"
+                                                    value={channel.id_chanel}
+                                                    onChange={handleChannelSelection}
+                                                />
+                                                <label htmlFor={channel.id_chanel} key={channel.id_chanel} className="flex items-center gap-2 text-xs">
+                                                    {channel.title}
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <Button type="submit" disabled={isPending}>{isPending ? 'Loading...' : 'Kirim'}</Button>
+                            </form>
+                        </div>
+                        <div className="md:order-2 order-1">
+                            <div className="p-2">
+                                <Label>Search</Label>
+                                <Input type="search" placeholserd="search...." onChange={search} />
+
                             </div>
-                            <Button type="submit" disabled={isPending}>{isPending ? 'Loading...' : 'Kirim'}</Button>
-                        </form>
+                            <div className="grid grid-cols-2  max-h-[300px] overflow-auto gap-2">
+                                {movieData.isLoading && (
+                                    <>
+                                        <Skeleton className="h-44 w-full rounded-none" />
+                                        <Skeleton className="h-44 w-full rounded-none" />
+                                        <Skeleton className="h-44 w-full rounded-none" />
+                                        <Skeleton className="h-44 w-full rounded-none" />
+                                    </>
+                                )}
+                                {movieData?.data?.data?.results?.map((e, i) => (
+                                    <div key={i} onClick={() => handleClick(e)} className="relative cursor-pointer "> {/* Pastikan tinggi dan lebar ditentukan */}
+                                        {e.poster_path ? (
+                                            <>
+                                                <p className="text-xs font-semibold leading-2">{e?.title ? e.title : e?.name}</p>
+                                                <div className="h-44 relative">
+                                                    <Image
+                                                        src={`${process.env.NEXT_PUBLIC_ENDPOINT_TMBD_IMAGE}/original/${e.poster_path}`}
+                                                        alt={e.name || e.title || 'Movie Poster'} // Fallback alt text
+                                                        fill
+                                                        style={{ objectFit: 'cover' }} // Object fit sesuai kebutuhan
+                                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Sesuaikan ukuran responsif
+                                                        priority={i < 3} // Hanya untuk gambar penting, misalnya tiga gambar pertama
+                                                    />
+                                                </div>
+
+                                            </>
+                                        ) : (
+                                            <div className="bg-gray-300 h-full w-full flex items-center justify-center">
+                                                {/* Placeholder jika tidak ada poster */}
+                                                <span>No Image</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </DialogContent>
             </Dialog>

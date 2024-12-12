@@ -2,7 +2,7 @@ import { sequelize } from '@/lib/sequelize';
 import { DataTypes } from 'sequelize';
 import { nanoid } from 'nanoid';
 import User from './users';
-import {Link} from './links';
+
 
 export const Url = sequelize.define('urls', {
   id: {
@@ -14,7 +14,7 @@ export const Url = sequelize.define('urls', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  short_url: { 
+  short_url: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
@@ -34,4 +34,6 @@ export const Url = sequelize.define('urls', {
 });
 
 Url.belongsTo(User, { foreignKey: 'userId', onDelete: 'CASCADE' });
- 
+
+
+

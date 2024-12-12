@@ -42,7 +42,7 @@ export default async function Page({ params }) {
           {urls.links.map((e, i) => (
             <div key={i} className="flex items-center justify-between p-2 w-full">
               <p title={e.title}>
-                {e.title.length > 30 ? `${e.title.substring(0, 30)}...` : e.title}
+                {e.title}
               </p>
               <div className="flex items-center justify-center">
                 <a

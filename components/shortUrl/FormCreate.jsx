@@ -16,13 +16,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "../ui/textarea";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
+import CopyButton from "../CopyButton";
 
 export default function FormCreate() {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
         link: '',
-        mode: 'single',
+        type: 'single',
     });
 
     const handleIsOpen = () => {
@@ -40,14 +41,14 @@ export default function FormCreate() {
     const handleModeChange = (value) => {
         setFormData((prev) => ({
             ...prev,
-            mode: value,
+            type: value,
         }));
     };
-    const { mutate, isPending } = useMutation({
+    const { mutate, isPending,isSuccess,data } = useMutation({
         mutationFn: async (e) => {
             e.preventDefault()
             const createLink = await axios.post('/api/shorten', formData)
-            return createLink
+            return createLink.data
         }
     })
 
@@ -73,7 +74,7 @@ export default function FormCreate() {
                                 onValueChange={handleModeChange}
                             >
                                 <TabsList>
-                                    <TabsTrigger value="single">Single Link</TabsTrigger>
+                                    <TabsTrigger value="single" >Single Link</TabsTrigger>
                                     <TabsTrigger value="bulk">Bulk Link</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="single">
@@ -114,6 +115,22 @@ export default function FormCreate() {
                                         </div>
                                 </TabsContent>
                             </Tabs>
+                            {isSuccess && data.data.link && (
+                                <div>
+                                    <Label htmlFor="short_url">Short URL</Label>
+                                    <div className="flex gap-2">
+                                        <Input
+                                            name="short_url"
+                                            id="short_url"
+                                            value={data.data.link}
+                                            readOnly
+                                            placeholder="Short URL"
+                                            
+                                        />
+                                        <CopyButton textToCopy={data.data.link} />
+                                    </div>
+                                </div>
+                            )}
                             <DrawerFooter className="p-0">
                                 <Button type="submit" disabled={isPending}>Submit</Button>
                                 <DrawerClose asChild>

@@ -12,6 +12,8 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
+  GalleryHorizontal,
+  Settings,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -114,17 +116,17 @@ const data = {
   ],
   projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
+      name: "Galery",
+      url: "/dashboard/galery",
+      icon:GalleryHorizontal,
     },
     {
-      name: "Sales & Marketing",
+      name: "Settings",
       url: "#",
-      icon: PieChart,
+      icon: Settings,
     },
     {
-      name: "Travel",
+      name: "Scrapper",
       url: "#",
       icon: Map,
     },
