@@ -1,16 +1,17 @@
 import Article from "@/models/article"
 import { JSONToHTML } from "html-to-json-parser";
 import LocalTime from "./LocalTime";
-import {  notFound, } from 'next/navigation';
+import { notFound, } from 'next/navigation';
 import CreateLink from "@/components/Url/CreateLink";
 
-const getData = async (slug)=>{
+
+const getData = async (slug) => {
   return await Article.findOne({ where: { slug } })
 }
 
 
 export async function generateMetadata({ params }) {
-  const {slug} = await params
+  const { slug } = await params
   const data = await getData(slug);
 
   if (!data) {
@@ -32,22 +33,22 @@ export async function generateMetadata({ params }) {
 
   let description = 'No description available';
   let imageUrl = ''; // Inisialisasi variabel untuk URL gambar
- 
+
   try {
     const contentJson = data.content; // Langsung menggunakan objek
 
     // Mengambil teks dari beberapa paragraf pertama
     const paragraphs = contentJson.content
-    ?.filter(item => item.type === 'p') // Filter paragraf
-    ?.map(paragraph => {
-      // Periksa jika content ada dan merupakan array
-      if (Array.isArray(paragraph.content)) {
-        return paragraph.content.join(' '); // Gabungkan elemen content
-      }
-      return ''; // Jika content tidak ada, kembalikan string kosong
-    })
-    .slice(0, 2) // Ambil hanya dua paragraf pertama
-    .join(' ')
+      ?.filter(item => item.type === 'p') // Filter paragraf
+      ?.map(paragraph => {
+        // Periksa jika content ada dan merupakan array
+        if (Array.isArray(paragraph.content)) {
+          return paragraph.content.join(' '); // Gabungkan elemen content
+        }
+        return ''; // Jika content tidak ada, kembalikan string kosong
+      })
+      .slice(0, 2) // Ambil hanya dua paragraf pertama
+      .join(' ')
 
 
 
@@ -123,7 +124,8 @@ export default async function Page({ params }) {
   const result = await JSONToHTML(data.content, true);
 
   return (
-    <div className="min-h-screen py-6 px-4">
+    <div className="min-h-screen py-6 px-4 relative">
+  
       <CreateLink />
       <div className="md:w-[70vw] w-full mx-auto">
         <article className="prose lg:prose-lg prose-h2:m-auto prose-h1:my-4 prose-h3:m-auto prose-p:my-4 prose-slate prose-img:rounded-md prose-img:shadow-lg prose-img:block prose-img:m-auto w-full max-w-none">
@@ -141,6 +143,6 @@ export default async function Page({ params }) {
         </article>
       </div>
     </div>
-  
+
   )
 }

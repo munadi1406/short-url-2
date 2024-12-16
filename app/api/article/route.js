@@ -2,9 +2,10 @@ import { convertTitleToSlug } from "@/lib/converUrl";
 import { getUser } from "@/lib/dal";
 import { jsonResponse } from "@/lib/jsonResponse";
 import Article from "@/models/article";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import path from "path";
 import fs from "fs";
+import { VisitorStat } from "@/models/visistorStat";
 
 export async function POST(request) {
     const { content, title } = await request.json();
@@ -34,7 +35,7 @@ export async function POST(request) {
         await Article.create(data);
         return jsonResponse({ msg: "article berhasil dipublish" }, 200);
     } catch (error) {
-        console.error(error);
+    
         return jsonResponse({ msg: "internal server error" }, 500);
     }
 }
@@ -43,45 +44,78 @@ export async function POST(request) {
 export async function GET(req) {
     const { searchParams } = new URL(req.url);
     try {
+        const page = parseInt(searchParams.get('page')) || 1;  // Default to page 1
+        const pageSize = parseInt(searchParams.get('pageSize')) || 10;  // Default 10 items per page
+        const { id } = await getUser();  // ID of the user to filter
+        const idUser = id;
 
-        const page = parseInt(searchParams.get('page')) || 1;  // Default halaman 1
-        const pageSize = parseInt(searchParams.get('pageSize')) || 10;  // Default 10 item per halaman
-        const { id } = await getUser();  // ID user yang ingin difilter
-        const idUser = id
-
-        const lastCreatedAt = searchParams.get('lastCreatedAt') || null;  // Mendapatkan createdAt dari item terakhir yang dimuat sebelumnya
+        const lastCreatedAt = searchParams.get('lastCreatedAt') || null;  // Get lastCreatedAt from query params
+        const articleIds = searchParams.getAll('articleIds') || []; // Assuming you can provide a list of article IDs if needed
 
         const whereCondition = {
-            id_user: idUser,  // Menyaring berdasarkan ID User
+            id_user: idUser,  // Filter based on user ID
         };
 
-        // Jika lastCreatedAt diberikan, filter untuk mendapatkan data yang lebih baru dari 'lastCreatedAt'
+        // If lastCreatedAt is provided, filter to get data created before the provided timestamp
         if (lastCreatedAt) {
             whereCondition.createdAt = {
-                [Op.lt]: new Date(lastCreatedAt),  // Mengambil data yang createdAt-nya lebih kecil dari 'lastCreatedAt'
+                [Op.lt]: new Date(lastCreatedAt),  // Get data created before 'lastCreatedAt'
             };
         }
 
-        // Ambil data dengan kondisi dan urutan DESC berdasarkan createdAt
-        const links = await Article.findAll({
+        // If articleIds are provided, filter the articles by those IDs
+        if (articleIds.length > 0) {
+            whereCondition.id = {
+                [Op.in]: articleIds,  // Filter based on provided article IDs
+            };
+        }
+
+        // Retrieve articles with conditions and order them by createdAt in descending order
+        const articles = await Article.findAll({
             where: whereCondition,
-            order: [['createdAt', 'DESC']],  // Urutkan berdasarkan createdAt secara descending
-            limit: pageSize,  // Batasi jumlah item yang diambil per halaman
+            order: [['createdAt', 'DESC']],  // Order by createdAt in descending order
+            limit: pageSize,  // Limit number of items per page
         });
 
-        // Jika ada data yang ditemukan, ambil createdAt item terakhir sebagai referensi untuk page berikutnya
-        const lastLink = links.length > 0 ? links[links.length - 1] : null;
+        // Get the IDs of the articles fetched
+        const articleIdsList = articles.map(article => article.id);
 
+        // Fetch the visitor count for each article using the 'in' operator
+        const visitorStats = await VisitorStat.findAll({
+            where: {
+                articleId: {
+                    [Op.in]: articleIdsList,  // Get visitors for articles in the list
+                }
+            },
+            attributes: [
+                'articleId',
+                [Sequelize.fn('COUNT', Sequelize.col('visitors.id')), 'visitorCount']
+            ],
+            group: ['articleId']  // Group by articleId to count visitors for each article
+        });
 
+        // Map the visitor count to each article
+        const articlesWithVisitorCount = articles.map(article => {
+            const visitorStat = visitorStats.find(stat => stat.articleId === article.id);
+            return {
+                ...article.toJSON(),
+                visitorCount: visitorStat ? visitorStat.get('visitorCount') : 0  // Add visitor count
+            };
+        });
+
+        // Get the last createdAt item as a reference for the next page
+        const lastArticle = articlesWithVisitorCount.length > 0 ? articlesWithVisitorCount[articlesWithVisitorCount.length - 1] : null;
+
+        // Return the response with articles, pagination info, and visitor count
         return jsonResponse({
-            data: links,
+            data: articlesWithVisitorCount,
             pagination: {
                 currentPage: page,
                 pageSize: pageSize,
-                totalItems: links.length,
-                lastCreatedAt: lastLink ? lastLink.createdAt : null,  // Kirimkan createdAt item terakhir
-            }
-        }, 200)
+                totalItems: articlesWithVisitorCount.length,
+                lastCreatedAt: lastArticle ? lastArticle.createdAt : null,  // Send the createdAt of the last item
+            },
+        }, 200);
     } catch (error) {
         console.error("Error fetching data:", error.message);
         return jsonResponse({

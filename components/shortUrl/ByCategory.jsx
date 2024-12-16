@@ -19,20 +19,20 @@ import EditForm from "./EditForm";
 import DeleteLink from "./DeleteLink";
 import Link from "next/link";
 import { Eye, Plus, SendHorizontal, Wrench } from "lucide-react";
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from "@/components/ui/collapsible"
 import DeleteLinkCategory from "./DeleteLinkCategory";
 import CopyButton from "../CopyButton";
 import DialogAdd from "./DialogAdd";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 
-export default function ByCateory({ handleClickSendMessage }) {
+export default function ByCateory({ handleClickSendMessage,handleRefetch }) {
     const [expandedLinks, setExpandedLinks] = useState({});
-
+    const [query,setQuery] = useState('')
     // Fungsi untuk toggle sub-link
+
+  
+
     const handleToggle = (id) => {
         setExpandedLinks((prev) => ({
             ...prev,
@@ -47,15 +47,19 @@ export default function ByCateory({ handleClickSendMessage }) {
         isFetchingNextPage,
         refetch
     } = useInfiniteQuery({
-        queryKey: ['links-categori'],
+        queryKey: [`links-categori`],
         queryFn: async ({ pageParam }) => {
-            const response = await axios.get(`/api/shorten?${pageParam ? `lastCreatedAt=${pageParam}` : ''}&category=true`);
+            const response = await axios.get(`/api/shorten?${pageParam ? `lastCreatedAt=${pageParam}` : ''}&category=true${query ?`&search=${query}` : ''}`);
             return response.data;
         },
         getNextPageParam: (lastPage) => lastPage.pagination.lastCreatedAt,
     });
-
-    // Konfigurasi IntersectionObserver
+    useEffect(()=>{
+        if(handleRefetch){
+            handleRefetch(refetch)
+        }
+    },[])
+    
     const { ref, inView } = useInView({
         triggerOnce: false, // Memastikan observer aktif berkali-kali
         threshold: 0.5, // Memuat data saat 50% elemen terlihat
@@ -67,6 +71,7 @@ export default function ByCateory({ handleClickSendMessage }) {
 
     // Fungsi untuk mengatur mode edit
     const handleEdit = (data) => {
+
         if (isEdit && currentData.id === data.id) {
             setCurrentData({});
             setIsEdit(false);
@@ -75,15 +80,37 @@ export default function ByCateory({ handleClickSendMessage }) {
             setIsEdit(true);
         }
     };
-    const [isAdd,setIsAdd] = useState(false)
-    const handleAdd = (e)=>{
+    const [isAdd, setIsAdd] = useState(false)
+    const handleAdd = (e) => {
         setCurrentData(e)
         setIsAdd(true)
     }
 
+    let searchTimeout;
+    const search = (e) => {
+        const query = e.target.value;
+   
+        if (query.length > 3) {
+            // setIsSearch(true);
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            searchTimeout = setTimeout(async () => {
+                setQuery(query);
+            }, 2000);
+        } else {
+            setQuery("");
+        }
+    };
+    useEffect(()=>{
+        refetch()
+    },[query])
+
     return (
         <div >
-            <DialogAdd refetch={refetch} isOpen={isAdd} setIsOpen={setIsAdd} currentData={currentData}/>
+            <DialogAdd refetch={refetch} isOpen={isAdd} setIsOpen={setIsAdd} currentData={currentData} />
+            <Label htmlFor="search">Search</Label>
+            <Input type="search" id="search" placeholder="search" onChange={search}/>
             <Table className="overflow-scroll ">
                 <TableCaption>Daftar Link yang Tersedia</TableCaption>
                 <TableHeader>
@@ -105,23 +132,18 @@ export default function ByCateory({ handleClickSendMessage }) {
 
                         data?.pages?.flatMap((page) => page.data).map((link, index) => (
                             <Fragment key={link.id}>
-                                <TableRow onClick={() => handleToggle(link.id)}>
-                                    <TableCell className="font-medium">{index + 1}</TableCell>
-                                    <TableCell>
-                                        <a
-                                            className="hover:text-blue-600 hover:underline"
-                                            href={link.link}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                        >
-                                            {link.title}
-                                        </a>
+                                <TableRow >
+                                    <TableCell className="font-medium" onClick={() => handleToggle(link.id)}>{index + 1}</TableCell>
+                                    <TableCell onClick={() => handleToggle(link.id)}>
+
+                                        {link.title}
+
                                     </TableCell>
-                                    <TableCell>0</TableCell>
-                                    <TableCell>{new Date(link.createdAt).toLocaleString()}</TableCell>
+                                    <TableCell onClick={() => handleToggle(link.id)}>0</TableCell>
+                                    <TableCell onClick={() => handleToggle(link.id)}>{new Date(link.createdAt).toLocaleString()}</TableCell>
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
                                         <Button className="text-xs bg-slate-900" onClick={() => handleAdd(link)}><Plus /> </Button>
-                                        <Button onClick={() => handleEdit(link)}><Wrench /></Button>
+                                        <Button onClick={() => handleEdit({ title: link.title, id: link.id, link: `${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${link.short_url}` })}><Wrench /></Button>
                                         <Link href={`/l/${link.short_url}`} target="_blank" className={`${buttonVariants()} bg-yellow-400 hover:bg-yellow-500`}><Eye /></Link>
                                         <Button onClick={() => handleClickSendMessage({ title: link.title, link: `l/${link.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
                                         <CopyButton textToCopy={`${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${link.short_url}`} />
@@ -155,20 +177,29 @@ export default function ByCateory({ handleClickSendMessage }) {
                                                     </TableHeader>
                                                     <TableBody>
                                                         {link.links.map((subLink, subIndex) => (
-                                                            <TableRow key={subLink.id}>
-                                                                <TableCell className="font-medium">{subIndex + 1}</TableCell>
-                                                                <TableCell className="font-medium">{subLink.title}</TableCell>
-                                                                <TableCell className="font-medium">0</TableCell>
-                                                                <TableCell className="font-medium">{new Date(subLink.createdAt).toLocaleString()}</TableCell>
-                                                                <TableCell className="flex gap-2">
+                                                            <Fragment key={subLink.id}>
+                                                                <TableRow key={subLink.id}>
+                                                                    <TableCell className="font-medium">{subIndex + 1}</TableCell>
+                                                                    <TableCell className="font-medium">{subLink.title}</TableCell>
+                                                                    <TableCell className="font-medium">0</TableCell>
+                                                                    <TableCell className="font-medium">{new Date(subLink.createdAt).toLocaleString()}</TableCell>
+                                                                    <TableCell className="flex gap-2">
+                                                                        <Button className="text-xs" onClick={() => handleEdit(subLink)}><Wrench /></Button>
+                                                                        <Link href={`/l/${subLink.short_url}`} target="_blank" className={`${buttonVariants()} bg-yellow-400 hover:bg-yellow-500`}><Eye /></Link>
+                                                                        <Button onClick={() => handleClickSendMessage({ title: link.subLink, link: `l/${subLink.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
+                                                                        <CopyButton textToCopy={`${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${subLink.short_url}`} />
+                                                                        <DeleteLink data={subLink} refetch={refetch} />
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                                {currentData?.id === subLink.id && isEdit && (
+                                                                    <TableRow>
+                                                                        <TableCell colSpan="5">
+                                                                            <EditForm data={currentData} />
+                                                                        </TableCell>
+                                                                    </TableRow>
+                                                                )}
+                                                            </Fragment>
 
-                                                                    <Button className="text-xs" onClick={() => handleEdit(subLink)}><Wrench /></Button>
-                                                                    <Link href={`/l/${subLink.short_url}`} target="_blank" className={`${buttonVariants()} bg-yellow-400 hover:bg-yellow-500`}><Eye /></Link>
-                                                                    <Button onClick={() => handleClickSendMessage({ title: link.subLink, link: `l/${subLink.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
-                                                                    <CopyButton textToCopy={`${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${subLink.short_url}`} />
-                                                                    <DeleteLink data={subLink} refetch={refetch} />
-                                                                </TableCell>
-                                                            </TableRow>
                                                         ))}
                                                     </TableBody>
                                                 </Table>

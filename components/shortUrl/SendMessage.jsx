@@ -6,6 +6,8 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { Switch } from "@/components/ui/switch"
+
 import axios from "axios";
 import {
     Dialog,
@@ -26,26 +28,27 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
         channelIds: [],
     });
     const { toast } = useToast();
+    const [withIcon,setWithIcon] = useState(false)
+    const titleIcon = withIcon ? "🎬 " : '';
+    const ratingIcon = withIcon ? "⭐ " : '';
+    const genreIcon = withIcon ? "🎭 " :'';
+    const overviewIcon = withIcon ? "📜 " :'';
     const handleClick = async (data) => {
         const detail = await axios.get(`/api/movie/detail?id=${data.id}&type=${data.media_type}`);
         const datas = detail.data.data;
-     
+
 
         const genres = datas.genres.map(genre => genre.name).join(', ');
 
         // Define Unicode emojis or other icons for better presentation
-        const titleIcon = "🎬";
-        const ratingIcon = "⭐";
-        const genreIcon = "🎭";
-        const overviewIcon = "📜";
 
-        // Format message with icons and new line breaks for better readability
+        
         setFormData((prev) => ({
             ...prev,
-            message: `${titleIcon} *Title*: ${data.name ? data.name : data?.title}\n` +
-                `${ratingIcon} *Rating*: ${data.vote_average} / ${data.vote_count} votes\n` +
-                `${genreIcon} *Genre*: ${genres}\n\n` +
-                `${overviewIcon} *Overview*: \n${data.overview}`,
+            message: `${titleIcon}*Title*: ${data.name ? data.name : data?.title}\n` +
+                `${ratingIcon}*Rating*: ${data.vote_average} / ${data.vote_count} votes\n` +
+                `${genreIcon}*Genre*: ${genres}\n\n` +
+                `${overviewIcon}*Overview*: \n${data.overview}`,
             poster_path: data.poster_path,
         }));
     };
@@ -112,7 +115,7 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
     })
     const [query, setQuery] = useState("");
     const movieData = useQuery({
-        queryKey: [`movie-${query}`], queryFn: async () => {
+        queryKey: [`movie`], queryFn: async () => {
             const movie = await axios.get(`/api/movie?search=${query}`)
             return movie.data
         },
@@ -121,7 +124,7 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
     let searchTimeout;
     const search = (e) => {
         const query = e.target.value;
-   
+
         if (query.length > 3) {
             // setIsSearch(true);
             if (searchTimeout) {
@@ -131,14 +134,18 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
                 setQuery(query);
             }, 2000);
         } else {
-          
+
             setQuery("");
-        
+
         }
     };
-    useEffect(() => {
+
+    useEffect(()=>{
+           
+            movieData.refetch()
         
-    }, [query])
+    },[query])
+
 
 
     return (
@@ -177,6 +184,10 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
                                         value={formData.hyperlinks}
                                         onChange={handleChange}
                                     />
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <Switch id="airplane-mode" checked={withIcon} onCheckedChange={(e)=>setWithIcon(!withIcon)}/>
+                                    <Label htmlFor="airplane-mode">With Icon ?</Label>
                                 </div>
                                 <div>
                                     <Label>Channel</Label>

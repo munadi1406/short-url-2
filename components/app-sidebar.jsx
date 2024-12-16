@@ -121,13 +121,13 @@ const data = {
       icon:GalleryHorizontal,
     },
     {
-      name: "Settings",
-      url: "#",
+      name: "Tools",
+      url: "/dashboard/tools",
       icon: Settings,
     },
     {
       name: "Scrapper",
-      url: "#",
+      url: "/dashboard/scrapper",
       icon: Map,
     },
   ],

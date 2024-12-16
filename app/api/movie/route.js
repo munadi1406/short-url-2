@@ -8,9 +8,8 @@ export async function GET(req){
     const { searchParams } = new URL(req.url);
     try {
         const search = searchParams.get('search')
-        console.log({search})
-        console.log(`${process.env.ENDPOINT_TMBD}search/multi?query=${search}`)
-        const data = await axios.get(`${process.env.ENDPOINT_TMBD}search/multi?query=${encodeURIComponent(search)}`,{
+      
+        const data = await axios.get(`${process.env.ENDPOINT_TMBD}search/multi?query=${encodeURIComponent(search)}&language=id-ID`,{
             headers:{
                 accept: 'application/json',
                 Authorization: `Bearer ${process.env.TMDB_API_KEY}`

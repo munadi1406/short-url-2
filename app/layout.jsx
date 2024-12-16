@@ -1,7 +1,8 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import ReactQueryProvider from '@/lib/ReactQueryProvider'
-import { setupAssociations } from "@/models/setup";
+import RecoredVisitors from "@/components/visitor/RecordVisitors";
+
 
 
 const geistSans = localFont({
@@ -18,23 +19,24 @@ const geistMono = localFont({
 export const metadata = {
   title: "Dcrypt",
   description: "DCRYPT",
+  verification: {
+    google: 'qtEKHujoxH7iCaGO2a53GVjxRKRVaYj1zoMDf6LNTNI',
+  }
 };
 
 
-setupAssociations()
+// setupAssociations()
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <RecoredVisitors />
         <ReactQueryProvider>
-          
-           
-            {children}
-         
+          {children}
         </ReactQueryProvider>
       </body>
     </html>
-  ); 
+  );
 }

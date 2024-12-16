@@ -137,6 +137,7 @@ export async function GET(req) {
         const page = parseInt(searchParams.get('page')) || 1;  // Default halaman 1
         const pageSize = parseInt(searchParams.get('pageSize')) || 10;  // Default 10 item per halaman
         const { id } = await getUser();  // ID user yang ingin difilter
+        const search = searchParams.get('search') || '';  // Mendapatkan parameter pencarian
         const idUser = id;
 
         const lastCreatedAt = searchParams.get('lastCreatedAt') || null;  // Mendapatkan createdAt dari item terakhir yang dimuat sebelumnya
@@ -155,6 +156,10 @@ export async function GET(req) {
                 [Op.is]: null,  
             };
         }
+        if (search) {
+            whereCondition.title = { [Op.like]: `%${search}%` };  // Mencari `title` yang mengandung keyword
+        }
+        
 
         // Jika lastCreatedAt diberikan, filter untuk mendapatkan data yang lebih baru dari 'lastCreatedAt'
         if (lastCreatedAt) {
@@ -175,7 +180,8 @@ export async function GET(req) {
             queryOptions.include = {
                 model: Link,
                 as: 'links',
-                required: true,  // Optional, tapi jika ingin memastikan ada Link, bisa menambahkannya
+                required: true, 
+                order: [['links.createdAt', 'ASC']],
             };
             const urls = await Url.findAll(queryOptions);  // Mengambil data dari Url
             return jsonResponse({

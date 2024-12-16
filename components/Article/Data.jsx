@@ -73,7 +73,7 @@ export default function Data() {
                                     <TableCell>
                                         {article.title}
                                     </TableCell>
-                                    <TableCell>0</TableCell>
+                                    <TableCell>{article.visitorCount}</TableCell>
                                     <TableCell>{new Date(article.createdAt).toLocaleString()}</TableCell>
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
                                         <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleEdit(article)}><Wrench /></Button>

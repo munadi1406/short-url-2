@@ -68,20 +68,21 @@ export default function Data() {
         setOpenMessage(!openMessage)
         setCurrentData(data)
     }
+    const [customRefetch,setCustomRefetch] = useState({refetch:null})
 
-    // // Efek samping untuk memuat halaman berikutnya saat observer terlihat
-    // useEffect(() => {
-    //     if (inView && hasNextPage) {
-    //         fetchNextPage();
-    //     }
-    // }, [inView]);
+    const handleRefetch = (refetch)=>{
+        setCustomRefetch({refetch})
+    }
+   
+
+  
 
     return (
         <div className="space-y-4">
             <SendMessage isOpen={openMessage} setIsOpen={setOpenMessage} datas={currentData} />
             <div className="px-2 py-4 shadow-md rounded-md border border-gray-300">
-                <FormCreate />
-                <ByCategory handleClickSendMessage={handleClickSendMessage} />
+                <FormCreate refetch={customRefetch.refetch}/>
+                <ByCategory handleClickSendMessage={handleClickSendMessage} handleRefetch={handleRefetch}/>
             </div>
             <div className="px-2 py-4 shadow-md rounded-md border border-gray-300">
                 <h3 className="text-lg font-semibold text-gray-700">Tanpa Kategori</h3>

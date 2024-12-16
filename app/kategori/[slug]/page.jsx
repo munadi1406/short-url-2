@@ -5,7 +5,7 @@ import { notFound } from 'next/navigation';
 import React from 'react';
 
 const getData = async (slug) => {
-  return await Url.findOne({ where: { short_url: slug }, include: { model: Link, as: 'links' } });
+  return await Url.findOne({ where: { short_url: slug }, include: { model: Link, as: 'links' ,order: [['links.createdAt', 'ASC']]} });
 };
 
 export async function generateMetadata({ params }) {
@@ -40,8 +40,8 @@ export default async function Page({ params }) {
       ) : (
         <div className="w-full flex flex-col shadow-md rounded-md p-4">
           {urls.links.map((e, i) => (
-            <div key={i} className="flex items-center justify-between p-2 w-full">
-              <p title={e.title}>
+            <div key={i} className="grid grid-cols-3 p-2 w-full border-b border-blue-600">
+              <p title={e.title} className="col-span-2 text-sm font-semibold overflow-wrap break-words flex items-center">
                 {e.title}
               </p>
               <div className="flex items-center justify-center">

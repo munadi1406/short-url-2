@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '../ui/button'; // Asumsi Anda punya komponen Button yang sudah terintegrasi dengan Tailwind
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
+import Iklan from '../Iklan/Iklan';
 
 export default function CreateLink() {
     // State untuk menyimpan slug
@@ -103,10 +104,11 @@ export default function CreateLink() {
 
     return (
         <>
-            <div className="bg-green-600 flex flex-col justify-between p-8">
+            <Iklan />
+            <div className="bg-green-600 flex relative flex-col justify-between p-8">
                 {/* Tombol Create Link */}
                 {showCreateButton && (
-                    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 w-full text-center">
+                    <div className="relative top-4 left-1/2 transform -translate-x-1/2 w-full text-center">
                         <Button
                             onClick={handleCreateLinkClick}
                             disabled={loadingCreate}
@@ -121,7 +123,7 @@ export default function CreateLink() {
                 {showOpenButton && (
                     <div
                         id="openLinkButton"
-                        className="flex justify-center left-0 p-4 w-full mb-4 absolute"
+                        className="flex justify-center items-center left-0 py-8  w-full mb-4 absolute bottom-4"
                         style={{ top: `${topOpenLink}px` }}
                     >
                      

@@ -1,7 +1,7 @@
 import { sequelize } from '@/lib/sequelize';
 import { DataTypes } from 'sequelize';
 import User from './users';  // Impor model User
-import {Url} from './urls';
+import { Url } from './urls';
 
 export const Link = sequelize.define('links', {
   id: {
@@ -49,5 +49,6 @@ export const Link = sequelize.define('links', {
 // Tambahkan ini setelah semua model sudah didefinisikan
 
 Link.belongsTo(User, { foreignKey: 'idUsers', onDelete: 'CASCADE' });
-
+Link.belongsTo(Url, { foreignKey: 'idurls', onDelete: "CASCADE", as: "urls" });
+Url.hasMany(Link, { foreignKey: 'idurls', onDelete: "CASCADE", as: 'links' });
 

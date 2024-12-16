@@ -18,7 +18,7 @@ import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import CopyButton from "../CopyButton";
 
-export default function FormCreate() {
+export default function FormCreate({ refetch }) {
     const [isOpen, setIsOpen] = useState(false);
     const [formData, setFormData] = useState({
         title: '',
@@ -44,11 +44,14 @@ export default function FormCreate() {
             type: value,
         }));
     };
-    const { mutate, isPending,isSuccess,data } = useMutation({
+    const { mutate, isPending, isSuccess, data } = useMutation({
         mutationFn: async (e) => {
             e.preventDefault()
             const createLink = await axios.post('/api/shorten', formData)
             return createLink.data
+        },
+        onSuccess: () => {
+            refetch()
         }
     })
 
@@ -104,15 +107,15 @@ export default function FormCreate() {
                                     </div>
                                     <div>
 
-                                    <Label htmlFor="bulkLinks">Bulk Link</Label>
-                                    <Textarea
-                                        id="bulkLinks"
-                                        name="link"
-                                        placeholder="Masukkan beberapa link (satu per baris)"
-                                        value={formData.link}
-                                        onChange={handleChange}
+                                        <Label htmlFor="bulkLinks">Bulk Link</Label>
+                                        <Textarea
+                                            id="bulkLinks"
+                                            name="link"
+                                            placeholder="Masukkan beberapa link (satu per baris)"
+                                            value={formData.link}
+                                            onChange={handleChange}
                                         />
-                                        </div>
+                                    </div>
                                 </TabsContent>
                             </Tabs>
                             {isSuccess && data.data.link && (
@@ -125,7 +128,7 @@ export default function FormCreate() {
                                             value={data.data.link}
                                             readOnly
                                             placeholder="Short URL"
-                                            
+
                                         />
                                         <CopyButton textToCopy={data.data.link} />
                                     </div>
