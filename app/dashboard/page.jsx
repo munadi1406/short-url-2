@@ -1,11 +1,12 @@
-import { getUser } from '@/lib/dal'
-import { redirect } from 'next/navigation'
-import React from 'react'
+import Data from "@/components/stat/Data"
+
+
+
 
 const page = async () => {
-
+  
   return (
-    <div>dashboard</div>
+    <div><Data/></div>
   ) 
 }
  

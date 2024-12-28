@@ -15,7 +15,7 @@ export default async function page({ params }) {
 
   // Redirect dan simpan slug di sessionStorage pada sisi client
   // Gunakan script untuk menyimpan slug di sessionStorage pada client side
-  const redirectUrl = `/${data.slug}`;
+  const redirectUrl = `/a/${data.slug}`;
 
   return (
     <>

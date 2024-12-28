@@ -33,18 +33,19 @@ export default async function Page({ params }) {
   return (
     <div className="py-4 flex w-full md:w-[70vw] m-auto justify-center items-center flex-col gap-4">
       <h1 className="text-4xl font-semibold text-center p-4 w-full shadow-md rounded-md">{urls.title}</h1>
+      {/* <h1 className="text-4xl font-semibold text-center p-4 w-full shadow-md rounded-md">{urls.updatedAt}</h1> */}
       {urls.links.length === 0 ? (
         <div className="w-full text-center py-6">
           <p className="text-lg text-gray-500">No links available for this URL.</p>
         </div>
       ) : (
-        <div className="w-full flex flex-col shadow-md rounded-md p-4">
+        <div className="w-full flex flex-col shadow-md rounded-md p-4 gap-2">
           {urls.links.map((e, i) => (
-            <div key={i} className="grid grid-cols-3 p-2 w-full border-b border-blue-600">
+            <div key={i} className="grid grid-cols-3 gap-4 p-2 w-full border-b border-blue-600">
               <p title={e.title} className="col-span-2 text-sm font-semibold overflow-wrap break-words flex items-center">
                 {e.title}
               </p>
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-end">
                 <a
                   className={buttonVariants()}
                   href={e.link}

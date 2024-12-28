@@ -20,6 +20,10 @@ const nextConfig = {
                 source: '/l/:slug', // URL pendek yang diakses pengguna
                 destination: '/link/:slug', // URL asli yang digunakan di aplikasi Anda
             },
+            {
+                source: '/a/:slug', // URL pendek yang diakses pengguna
+                destination: '/article/:slug', // URL asli yang digunakan di aplikasi Anda
+            },
         ];
     },
 }

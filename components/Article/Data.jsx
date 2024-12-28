@@ -76,7 +76,7 @@ export default function Data() {
                                     <TableCell>{article.visitorCount}</TableCell>
                                     <TableCell>{new Date(article.createdAt).toLocaleString()}</TableCell>
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
-                                        <Button className="bg-green-600 hover:bg-green-700" onClick={() => handleEdit(article)}><Wrench /></Button>
+                                        <Link href={`./article/${article.id}`} className={` ${buttonVariants({ className:"!bg-green-600"})}   `} ><Wrench /></Link>
                                         <Link target='_blank' href={`/${article.slug}`} className={buttonVariants()}><Eye /></Link>
 
                                         <DeleteArticle data={article} refetch={refetch} />

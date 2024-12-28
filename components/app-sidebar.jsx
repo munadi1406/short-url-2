@@ -71,6 +71,23 @@ const data = {
       ],
     },
     {
+      title: "Post",
+      url: "#",
+      icon: SquareTerminal,
+      isActive: false,
+      items: [
+        {
+          title: "Create Post",
+          url: "/dashboard/post/create",
+        },
+        {
+          title: "Posts",
+          url: "/dashboard/post",
+        },
+        
+      ],
+    },
+    {
       title: "Users",
       url: "#",
       icon: Bot,
@@ -115,6 +132,11 @@ const data = {
     },
   ],
   projects: [
+    {
+      name: "Genre",
+      url: "/dashboard/genre",
+      icon:GalleryHorizontal,
+    },
     {
       name: "Galery",
       url: "/dashboard/galery",

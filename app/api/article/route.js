@@ -39,6 +39,36 @@ export async function POST(request) {
         return jsonResponse({ msg: "internal server error" }, 500);
     }
 }
+export async function PUT(request) {
+    const { content, title,articleId } = await request.json();
+    const { id } = await getUser();
+    try {
+
+        
+
+        let slug = convertTitleToSlug(title);
+
+        // Ensure unique slug
+        let existingSlug = await Article.findOne({ where: { slug } });
+        let slugSuffix = 1;
+        while (existingSlug) {
+            slug = `${convertTitleToSlug(title)}-${slugSuffix++}`;
+            existingSlug = await Article.findOne({ where: { slug } });
+        }
+
+        const data = {
+            content,
+            title,
+            slug,
+            id_user: id,
+        };
+
+        await Article.update(data,{where:{id:articleId}});
+        return jsonResponse({ msg: "article berhasil dipublish" }, 200);
+    } catch (error) {
+        return jsonResponse({ msg: "internal server error" }, 500);
+    }
+}
 
 
 export async function GET(req) {
