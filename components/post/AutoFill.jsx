@@ -26,7 +26,7 @@ export default function AutoFill({handleAutoFill}) {
     const handleClick = async (data) => {
         const detail = await axios.get(`/api/movie/detail?id=${data.id}&type=${data.media_type}`);
         const datas = detail.data.data;
-        console.log(datas)
+    
         handleAutoFill(datas)
     };
 

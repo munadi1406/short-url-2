@@ -20,7 +20,7 @@ export default function Links({ data }) {
       return qualityIndexA - qualityIndexB; // Nilai indeks lebih kecil (kualitas lebih tinggi) akan berada di awal
     });
     
-    console.log(sortedLinks)
+ 
     // Kelompokkan berdasarkan kualitas
     return sortedLinks.reduce((acc, link) => {
       // Jika kelompok untuk quality belum ada, buat baru
