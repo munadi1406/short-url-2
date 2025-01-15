@@ -6,6 +6,7 @@ import { Op, Sequelize } from "sequelize";
 import path from "path";
 import fs from "fs";
 import { VisitorStat } from "@/models/visistorStat";
+import cloudinary from "@/lib/cloudinary";
 
 export async function POST(request) {
     const { content, title } = await request.json();
@@ -35,16 +36,16 @@ export async function POST(request) {
         await Article.create(data);
         return jsonResponse({ msg: "article berhasil dipublish" }, 200);
     } catch (error) {
-    
+
         return jsonResponse({ msg: "internal server error" }, 500);
     }
 }
 export async function PUT(request) {
-    const { content, title,articleId } = await request.json();
+    const { content, title, articleId } = await request.json();
     const { id } = await getUser();
     try {
 
-        
+
 
         let slug = convertTitleToSlug(title);
 
@@ -63,7 +64,7 @@ export async function PUT(request) {
             id_user: id,
         };
 
-        await Article.update(data,{where:{id:articleId}});
+        await Article.update(data, { where: { id: articleId } });
         return jsonResponse({ msg: "article berhasil dipublish" }, 200);
     } catch (error) {
         return jsonResponse({ msg: "internal server error" }, 500);
@@ -160,61 +161,58 @@ export async function GET(req) {
 export const detectImageDeletion = (json) => {
     // Jika json adalah string JSON, lakukan parsing terlebih dahulu
     const parsedJson = typeof json === 'string' ? JSON.parse(json) : json;
-  
+
     // Periksa apakah parsedJson adalah array atau objek dan akses kontennya
     const content = Array.isArray(parsedJson) ? parsedJson : parsedJson.content || [];
-    
+
     // Ekstrak node gambar dari JSON
     const currentImages = content.filter(node => node.type === 'img' && node.attributes && node.attributes.src); // Memastikan ada 'src' di dalam attrs
-    
+
     // Mendapatkan src gambar
     const currentImageSet = currentImages.map(image => image.attributes.src);
-  
+
     return currentImageSet;
 };
 const UPLOAD_DIR = path.resolve(process.env.ROOT_PATH ?? "", "public/uploads");
 // Fungsi untuk menghapus gambar dari sistem file
-const deleteImagesFromFileSystem = (images) => {
-    images.forEach(imagePath => {
-       
-        const filePath = path.resolve(UPLOAD_DIR, imagePath.split('/')[2]);
-       
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                console.error(`Gagal menghapus gambar: ${filePath}`);
-            } else {
-                console.log(`Gambar berhasil dihapus: ${filePath}`);
-            }
-        });
-    });
+const deleteImagesFromFileSystem = async (images) => {
+    for (const imagePath of images) {
+        const imageUrlParts = imagePath.split('/');
+        const publicIdWithExtension = imageUrlParts.slice(-2).join('/'); // Ambil 2 segmen terakhir dari URL
+        const publicId = publicIdWithExtension.split('.').slice(0, -1).join('.');
+
+        await cloudinary.uploader.destroy(publicId); // Tunggu setiap penghapusan selesai
+
+    }
 };
+
 
 // Fungsi untuk menangani permintaan DELETE
 export async function DELETE(req) {
     const { searchParams } = new URL(req.url);
     const session = await getUser()
- 
+
     try {
         const id = searchParams.get('id');
         const checkOwnerArticle = await Article.findByPk(id, { attributes: ['id_user', 'content'] });
-        
+
         if (checkOwnerArticle.id_user !== session.id) {
             return jsonResponse({ msg: "unauthorized" }, 401);
         }
 
         // Deteksi gambar yang akan dihapus
         const imagenames = detectImageDeletion(checkOwnerArticle.content);
-      
-       
+
+
         deleteImagesFromFileSystem(imagenames);
 
-       
-        await Article.destroy({where:{id}})
+
+        await Article.destroy({ where: { id } })
 
         return jsonResponse({ msg: `Artikel dan gambar berhasil dihapus` });
 
     } catch (error) {
-        
+
         return jsonResponse({ msg: "internal server error" }, 500);
     }
 }

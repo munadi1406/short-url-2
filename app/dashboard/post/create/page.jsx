@@ -14,6 +14,7 @@ import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
+
 export default function Page() {
   const { data, isLoading } = useQuery({
     queryKey: ['genreAll'],
@@ -23,6 +24,7 @@ export default function Page() {
     }
   })
   const [newTag, setNewTag] = useState('')
+  const [genre, setGenre] = useState([])
   // State to hold the form inputs
   const [formData, setFormData] = useState({
     title: '',
@@ -33,7 +35,7 @@ export default function Page() {
     image: null,
     genres: [], // Array of genre IDs
     type: 'series', // Default to 'movie'
-    release_date: '', // Added release_date field
+
     tags: [],
   })
 
@@ -100,14 +102,7 @@ export default function Page() {
 
 
 
-  // Handle release date change
-  const handleReleaseDateChange = (e) => {
-    const { value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      release_date: value
-    }))
-  }
+
   const navigate = useRouter()
   const { toast } = useToast()
   const { mutate, isPending } = useMutation({
@@ -122,7 +117,7 @@ export default function Page() {
       formData.append('totalEpisode', data.totalEpisode)
       formData.append('trailer', data.trailer)
       formData.append('type', data.type)
-      formData.append('release_date', data.release_date)
+
 
       // Append the genres array
       data.genres.forEach((genre) => formData.append('genres[]', genre))
@@ -175,21 +170,22 @@ export default function Page() {
     }
   })
 
-  const handleAutoFill = (data)=>{
+  const handleAutoFill = (data) => {
     setFormData((prev) => ({
       ...prev,
       airTime: data?.first_air_date,
-      totalEpisode:data?.number_of_episodes,
-      title : data?.title ? data?.title : data?.name,
-      desc : data?.overview
+      totalEpisode: data?.number_of_episodes,
+      title: data?.title ? data?.title : data?.name,
+      desc: data?.overview
 
     }))
+    setGenre(data.genres)
   }
 
   return (
     <div className='bg-white rounded-md p-2 shadow-md'>
       <h1 className='text-lg font-semibold'>Create Post</h1>
-      <AutoFill handleAutoFill={handleAutoFill}/>
+      <AutoFill handleAutoFill={handleAutoFill} />
       <form onSubmit={handleSubmit}>
         <div className='p-2'>
           <Label htmlFor="title">Title</Label>
@@ -261,6 +257,11 @@ export default function Page() {
         </div>
         <div className='p-2'>
           <h3 className='text-md font-semibold'>Genre</h3>
+          <div className='flex flex-wrap p-2 text-xs text-blue-600 gap-2'>
+            {genre.map((e, i) => (
+              <p key={i}>{e.name}</p>
+            ))}
+          </div>
           {isLoading ? <Skeleton className={"h-[50px] w-full rounded-md"} /> :
             <div className='grid grid-cols-3 gap-2'>
               {data.data.map((genre, index) => (
@@ -294,18 +295,6 @@ export default function Page() {
               <Label htmlFor="series">Series</Label>
             </div>
           </RadioGroup>
-        </div>
-
-        <div className='p-2'>
-          <Label htmlFor="release_date">Release Date</Label>
-          <Input
-            type="date"
-            name="release_date"
-            id="release_date"
-            value={formData.release_date}
-            onChange={handleReleaseDateChange}
-            required
-          />
         </div>
         <div className='w-full p-2 flex flex-col gap-2'>
           <Label>Tag</Label>

@@ -77,7 +77,7 @@ export default function Data() {
                                     <TableCell>{new Date(article.createdAt).toLocaleString()}</TableCell>
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
                                         <Link href={`./article/${article.id}`} className={` ${buttonVariants({ className:"!bg-green-600"})}   `} ><Wrench /></Link>
-                                        <Link target='_blank' href={`/${article.slug}`} className={buttonVariants()}><Eye /></Link>
+                                        <Link target='_blank' href={`/a/${article.slug}`} className={buttonVariants()}><Eye /></Link>
 
                                         <DeleteArticle data={article} refetch={refetch} />
                                     </TableCell>

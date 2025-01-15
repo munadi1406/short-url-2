@@ -37,7 +37,7 @@ const getData = async (page = 1, limit = 10) => {
     });
     return data;
   } catch (error) {
-    console.error('Error fetching data:', error);
+   
     return { rows: [], count: 0 };
   }
 };
@@ -46,7 +46,7 @@ export async function generateMetadata({ searchParams }) {
   const searchParamsResolved = await searchParams;
   const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL;
   const page = parseInt(searchParamsResolved.page || '1', 10);
-  const title = page > 1 ? `Page ${page} - Drakoran` : `Drakoran - Download Drama Korea Subtitle Indonesia`;
+  const title = page > 1 ? `Page ${page} - Lyco` : `Lyco - Download Drama Korea Subtitle Indonesia`;
   const description = `Download Drama Korea Subtitle Indonesia`;
 
   return {
@@ -74,7 +74,7 @@ export default async function Home({ searchParams }) {
   const limit = 10;
 
   const { rows: posts, count } = await getData(page, limit);
-
+  
   const totalPages = Math.ceil(count / limit);
 
   // Generate range of pages
@@ -103,10 +103,11 @@ export default async function Home({ searchParams }) {
       >
         {posts.map((post, i) => (
           <MainCard post={post} key={i} />
+    
         ))}
       </div>
 
-      {totalPages > limit && (
+      {count > limit && (
         <div className="flex items-center justify-center mt-6 space-x-2">
           {page > 1 && (
             <Link

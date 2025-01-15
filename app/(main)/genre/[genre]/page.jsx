@@ -36,8 +36,8 @@ const getData = async (genre) => {
 export async function generateMetadata({ params }) {
     const genre = decodeURIComponent(params.genre);
     const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL || 'http://localhost:3000';
-    const title = `Drama Korea ${genre} - Drakoran `;
-    const description = `Drama Korea ${genre} - Drakoran - Download Drama Korea Subtitle Indonesia `;
+    const title = `Drama Korea ${genre} - Lyco `;
+    const description = `Drama Korea ${genre} - Lyco - Download Drama Korea Subtitle Indonesia `;
 
     return {
         title,
@@ -47,13 +47,13 @@ export async function generateMetadata({ params }) {
             description,
             url: `${endpoint}/genre/${genre}`,
             type: 'website',
-            siteName: 'Drakoran',
+            siteName: 'Lyco',
         },
         twitter: {
             card: 'summary_large_image',
             title,
             description,
-            site: '@Drakoran',
+            site: '@Lyco',
         },
     };
 }

@@ -38,8 +38,8 @@ export async function generateMetadata({ params }) {
   const param = await params
   const tag = decodeURIComponent(param.tag);
   const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL;
-  const title = `Drama Korea ${tag} - Drakoran `;
-  const description = `${tag} - Drakoran - Download Drama Korea Subtitle Indonesia `;
+  const title = `Drama Korea ${tag} - Lyco `;
+  const description = `${tag} - Lyco - Download Drama Korea Subtitle Indonesia `;
 
   return {
     title,
@@ -49,13 +49,13 @@ export async function generateMetadata({ params }) {
       description,
       url: `${endpoint}/tag/${tag}`,
       type: 'website',
-      siteName: 'Drakoran',
+      siteName: 'Lyco',
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      site: '@Drakoran',
+      site: '@Lyco',
     },
   };
 }
@@ -73,7 +73,7 @@ export default async function TagPage({ params, searchParams }) {
   if (!data || data.posts.length === 0) {
     return (
       <div className="py-8">
-        <h3 className="text-2xl font-bold text-center">Tag: {tag}</h3>
+        <h3 className="text-2xl font-bold text-center">{tag}</h3>
         <p className="text-center text-gray-500">Tidak ada postingan yang ditemukan untuk tag ini.</p>
       </div>
     );

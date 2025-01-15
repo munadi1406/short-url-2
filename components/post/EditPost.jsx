@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast'
 
 import { useMutation, useQuery } from '@tanstack/react-query'
 import axios from 'axios'
+import { CldUploadButton } from 'next-cloudinary'
 import React, { useEffect, useState } from 'react'
 
 export default function EditPage({ post, refetch }) { // Expect `post` as props
@@ -34,7 +35,7 @@ export default function EditPage({ post, refetch }) { // Expect `post` as props
         image: null,
         genres: [], // Array of genre IDs
         type: 'series', // Default to 'series'
-        release_date: '',
+      
         tags: [],
     })
     const [newTag, setNewTag] = useState('')
@@ -48,7 +49,7 @@ export default function EditPage({ post, refetch }) { // Expect `post` as props
                 image: null, // Don't populate file input
                 genres: post.genres ? post.genres.map((genre) => genre.id) : [],
                 type: post.type || 'series',
-                release_date: post.release_date || '',
+               
                 tags: post.tags ? post.tags.map((tag) => tag.id) : [], // Extract names
                 airTime:post.airTime || '',
                 totalEpisode:post.total_episode || '',
@@ -106,13 +107,7 @@ export default function EditPage({ post, refetch }) { // Expect `post` as props
         }))
     }
 
-    const handleReleaseDateChange = (e) => {
-        const { value } = e.target
-        setFormData((prev) => ({
-            ...prev,
-            release_date: value
-        }))
-    }
+   
     const { toast } = useToast()
     const { mutate, isPending } = useMutation({
         mutationFn: async (data) => {
@@ -124,7 +119,7 @@ export default function EditPage({ post, refetch }) { // Expect `post` as props
             formData.append('airTime', data.airTime)
             formData.append('totalEpisode', data.totalEpisode)
             formData.append('trailer', data.trailer)
-            formData.append('release_date', data.release_date)
+          
             data.genres.forEach((genre) => formData.append('genres[]', genre))
             data.tags.forEach((tag) => formData.append('tags[]', tag))
             if (data.image) {
@@ -238,6 +233,7 @@ export default function EditPage({ post, refetch }) { // Expect `post` as props
                         onChange={handleFileChange}
                     />
                 </div>
+      
                 <div className='p-2'>
                     <h3 className='text-md font-semibold'>Genre</h3>
                     {isGenresLoading ? <Skeleton className="h-[50px] w-full rounded-md" /> :
@@ -268,17 +264,7 @@ export default function EditPage({ post, refetch }) { // Expect `post` as props
                         </div>
                     </RadioGroup>
                 </div>
-                <div className='p-2'>
-                    <Label htmlFor="release_date">Release Date</Label>
-                    <Input
-                        type="date"
-                        name="release_date"
-                        id="release_date"
-                        value={formData.release_date}
-                        onChange={handleReleaseDateChange}
-                        required
-                    />
-                </div>
+               
                 <div className='p-2'>
                     <h3 className='text-md font-semibold'>Tags</h3>
                     {isTagsLoading ? <Skeleton className="h-[50px] w-full rounded-md" /> :

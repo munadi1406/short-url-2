@@ -8,7 +8,18 @@ const nextConfig = {
             hostname: 'image.tmdb.org',
             pathname: '/t/p/**', // Mendukung semua path dari TMDb
           },
+          {
+          protocol: 'https',
+          hostname: 'res.cloudinary.com', // Tambahkan domain Cloudinary
+         
+        },
         ],
+        localPatterns: [
+            {
+              pathname: '/uploads/**',
+              search: '',
+            },
+          ],
       },
     async rewrites() {
         return [

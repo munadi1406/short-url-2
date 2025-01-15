@@ -41,7 +41,7 @@ export default function ByCateory({ handleClickSendMessage,handleRefetch }) {
     };
     const {
         data,
-        fetchNextPage,
+        fetchNextPage, 
         hasNextPage,
         isLoading,
         isFetchingNextPage,

@@ -22,10 +22,6 @@ const Post = sequelize.define(
       type: DataTypes.ENUM('movie', 'series'),
       allowNull: false,
     },
-    release_date: {
-      type: DataTypes.DATEONLY,
-      allowNull: true,
-    },
     slug: {
       type: DataTypes.STRING(255),
       allowNull: false,

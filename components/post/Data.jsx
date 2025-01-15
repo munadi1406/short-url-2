@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
 
@@ -12,7 +13,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Button, buttonVariants } from "../ui/button";
 // import EditGenre from "./EditGenre";
 // import DeleteGenre from "./DeleteGenre";
@@ -24,9 +25,12 @@ import DeletePost from "./DeletePost";
 import EditPost from "./EditPost";
 import Image from "next/image";
 import EditLink from "./link/EditLink";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
 
 
 export default function Data() {
+    const [query,setQuery] = useState('')
     const {
         data,
         fetchNextPage,
@@ -37,7 +41,7 @@ export default function Data() {
     } = useInfiniteQuery({
         queryKey: ['genre'],
         queryFn: async ({ pageParam }) => {
-            const response = await axios.get(`/api/post?${pageParam ? `lastCreatedAt=${pageParam}` : ''}`);
+            const response = await axios.get(`/api/post?${pageParam ? `lastCreatedAt=${pageParam}` : ''}${query ?`&search=${query}` : ''}`);
             return response.data;
         },
         getNextPageParam: (lastPage) => lastPage.pagination.lastCreatedAt,
@@ -49,6 +53,25 @@ export default function Data() {
             return changeStatus.data
         }
     })
+    let searchTimeout;
+    const search = (e) => {
+        const query = e.target.value;
+   
+        if (query.length > 3) {
+            // setIsSearch(true);
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+            searchTimeout = setTimeout(async () => {
+                setQuery(query);
+            }, 2000);
+        } else {
+            setQuery("");
+        }
+    };
+    useEffect(()=>{
+        refetch()
+    },[query])
     const [currentData, setCurrentData] = useState({});
     const [isEdit, setIsEdit] = useState(false);
     const [typeEdit,setTypeEdit] = useState('')
@@ -67,6 +90,8 @@ export default function Data() {
     };
     return (
         <div>
+            <Label htmlFor="search">Search</Label>
+            <Input type="search" id="search" placeholder="search" onChange={search}/>
             <Table className="overflow-scroll ">
                 <TableCaption>Daftar Genre yang Tersedia</TableCaption>
                 <TableHeader>
@@ -74,7 +99,8 @@ export default function Data() {
                         <TableHead>No</TableHead>
                         <TableHead>Title</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Genre</TableHead>
+                        <TableHead>Tags</TableHead>
+                        <TableHead>Genres</TableHead>
                         <TableHead>updatedAt</TableHead>
                         <TableHead>Aksi</TableHead>
                     </TableRow>
@@ -93,6 +119,7 @@ export default function Data() {
                                     <TableCell className="font-medium">{index + 1}</TableCell>
                                     <TableCell>
                                         {post.title}
+                                      
                                         <Image className="w-auto h-auto" alt={post.title} src={post.image} height="100" width="50"/>
                                     </TableCell>
                                     <TableCell>
@@ -103,6 +130,13 @@ export default function Data() {
                                         />
                                     </TableCell>
 
+                                    <TableCell>
+                                        <div className="flex flex-wrap gap-2 ">
+                                            {post?.tags?.map((tag, tagId) => (
+                                                <Badge key={tagId}>{tag.name}</Badge>
+                                            ))}
+                                        </div>
+                                    </TableCell>
                                     <TableCell>
                                         <div className="flex flex-wrap gap-2 ">
                                             {post?.genres?.map((genre, genreId) => (

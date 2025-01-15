@@ -8,22 +8,10 @@ import { PostTag, Tag } from '@/models/tag';
 import { Op } from 'sequelize';
 import Episode from '@/models/episode';
 import PostLink from '@/models/postLinks';
+import { v4 as uuidv4 } from "uuid";
+import cloudinary from '@/lib/cloudinary';
+const uploadDir = path.resolve(process.env.ROOT_PATH ?? "", "public/uploads");;
 
-
-const moveFile = async (file) => {
-  const uploadDir = path.join(process.cwd(), 'public/uploads');
-  console.log(file.stream())
-  // Ensure the uploads directory exists
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
-
-  const filePath = path.join(uploadDir, file.name);
-  const buffer = Buffer.from(await file.arrayBuffer());
-  fs.writeFileSync(filePath, buffer);
-
-  return filePath;
-};
 
 // Helper function to generate a unique slug
 const generateUniqueSlug = async (title) => {
@@ -42,6 +30,8 @@ const generateUniqueSlug = async (title) => {
   return uniqueSlug;
 };
 
+
+
 export const POST = async (req, res) => {
   try {
     // Parse the form data
@@ -54,7 +44,7 @@ export const POST = async (req, res) => {
     const airTime = formData.get('airTime');
     const totalEpisode = formData.get('totalEpisode');
     const trailer = formData.get('trailer');
-    const release_date = formData.get('release_date');
+    
     const genres = formData.getAll('genres[]'); // 'genres' is expected to be an array of genre IDs
     const tags = formData.getAll('tags[]');
 
@@ -74,28 +64,35 @@ export const POST = async (req, res) => {
           title,
           description,
           type,
-          release_date,
           slug,
-          air_time:airTime,
-          total_episode:totalEpisode,
+          air_time: airTime,
+          total_episode: totalEpisode,
           trailer,
         },
         { transaction }
       );
 
-      // If a file is uploaded, move it to the uploads directory
-      let photoPath = null;
+      // If a file is uploaded, upload it to Cloudinary
       if (file) {
-        photoPath = await moveFile(file);
+        const fileBuffer = await file.arrayBuffer();
+        const fileBase64 = Buffer.from(fileBuffer).toString('base64');
 
-        await Post.update(
-          { image: `/uploads/${path.basename(photoPath)}` },
-          { where: { id: newPost.id }, transaction }
+        const uploadResult = await cloudinary.uploader.upload(
+          `data:${file.type};base64,${fileBase64}`,
+          {
+            folder: 'posts', // Folder di Cloudinary
+            public_id: `post_${newPost.id}`, // Public ID unik untuk file
+          }
         );
 
+        // Update post with the Cloudinary image URL
+        await Post.update(
+          { image: uploadResult.secure_url }, // Menggunakan secure_url dari hasil upload
+          { where: { id: newPost.id }, transaction }
+        );
       }
 
-
+      // Add genres if provided
       if (genres && genres.length > 0) {
         for (let genreId of genres) {
           await PostGenre.create(
@@ -107,8 +104,9 @@ export const POST = async (req, res) => {
           );
         }
       }
+
+      // Add tags if provided
       if (tags && tags.length > 0) {
-        console.log({ tags })
         for (let tagId of tags) {
           await PostTag.create(
             {
@@ -124,41 +122,40 @@ export const POST = async (req, res) => {
       await transaction.commit();
 
       // Return the new post record as a response
-      return jsonResponse({ statusCode: 201, msg: "data berhasil disimpan",data:{id:newPost.id} }, 201);
+      return jsonResponse({ statusCode: 201, msg: "Data berhasil disimpan", data: { id: newPost.id } }, 201);
     } catch (error) {
       // Roll back the transaction in case of error
       await transaction.rollback();
       console.error('Error creating post:', error);
 
-      return jsonResponse({ msg: "Error creating post" }, 500)
+      return jsonResponse({ msg: "Error creating post" }, 500);
     }
   } catch (error) {
     console.error('Error processing form data:', error);
-    return jsonResponse({ msg: "Error processing form data" }, 500)
-
+    return jsonResponse({ msg: "Error processing form data" }, 500);
   }
 };
 
 
 export const PUT = async (req, res) => {
   try {
+    
+
     // Parse the form data
     const formData = await req.formData();
 
     // Extract fields from the form data
-    const id = formData.get('id'); // ID of the post to update
+    const id = formData.get('id');
     const title = formData.get('title');
     const description = formData.get('desc');
     const airTime = formData.get('airTime');
     const totalEpisode = formData.get('totalEpisode');
     const trailer = formData.get('trailer');
     const type = formData.get('type');
-    const release_date = formData.get('release_date');
-    const genres = formData.getAll('genres[]'); // 'genres' is expected to be an array of genre IDs
+   
+    const genres = formData.getAll('genres[]');
     const tags = formData.getAll('tags[]');
-
-    // Extract the file (if present)
-    const file = formData.get('file'); // This should be the file input field in the form
+    const file = formData.get('file');
 
     // Begin transaction for updating the post
     const transaction = await Post.sequelize.transaction();
@@ -171,89 +168,78 @@ export const PUT = async (req, res) => {
       }
 
       // Update the post details
-      const slug = await generateUniqueSlug(title, id); // Generate a unique slug
+
       await existingPost.update(
         {
           title,
           description,
           type,
-          release_date,
-          slug,
-          air_time:airTime,
-          total_episode:totalEpisode,
+         
+          air_time: airTime,
+          total_episode: totalEpisode,
           trailer,
         },
         { transaction }
       );
 
-      // If a file is uploaded, remove the old photo and move the new one
-      let photoPath = null;
+      // If a file is uploaded, handle Cloudinary upload and deletion
       if (file) {
-        // Remove the old photo if it exists
+        // Delete the old photo from Cloudinary if it exists
         if (existingPost.image) {
-          const oldPhotoPath = path.join(process.cwd(), existingPost.image);
+          
+          const imageUrlParts = existingPost.image.split('/');
+          const publicIdWithExtension = imageUrlParts.slice(-2).join('/'); // Ambil 2 segmen terakhir dari URL
+          const publicId = publicIdWithExtension.split('.').slice(0, -1).join('.'); // Hilangkan ekstensi file
+          console.log({publicId})
           try {
-            await fs.promises.unlink(oldPhotoPath); // Delete the old photo
+            const test = await cloudinary.uploader.destroy(publicId);
+            console.log(test)
           } catch (error) {
-            console.error(`Error deleting old photo: ${error}`);
+            console.error(`Error deleting old Cloudinary image: ${error}`);
           }
         }
 
-        // Upload the new photo
-        photoPath = await moveFile(file);
+        const tempFilePath = `/tmp/${file.name}`; // Temporary file path
+        const buffer = Buffer.from(await file.arrayBuffer()); // Convert File to Buffer
+
+        // Write buffer to a temporary file
+        fs.writeFileSync(tempFilePath, buffer);
+
+        // Upload file to Cloudinary
+        const uploadedImage = await cloudinary.uploader.upload(tempFilePath, {
+          folder: 'posts',
+          public_id: `post_${id}_${Date.now()}`,
+          overwrite: true,
+        });
+        console.log({uploadedImage})
+
+        // Update the post image URL
         await existingPost.update(
-          { image: `/uploads/${path.basename(photoPath)}` },
+          { image: uploadedImage.secure_url },
           { transaction }
         );
       }
 
       // Update genres
       if (genres && genres.length > 0) {
-        // Remove existing genres
-        await PostGenre.destroy({
-          where: { post_id: id },
-          transaction,
-        });
-
-        // Add new genres
+        await PostGenre.destroy({ where: { post_id: id }, transaction });
         for (let genreId of genres) {
-          await PostGenre.create(
-            {
-              post_id: id,
-              genre_id: genreId,
-            },
-            { transaction }
-          );
+          await PostGenre.create({ post_id: id, genre_id: genreId }, { transaction });
         }
       }
 
       // Update tags
       if (tags && tags.length > 0) {
-        // Remove existing tags
-        await PostTag.destroy({
-          where: { post_id: id },
-          transaction,
-        });
-
-        // Add new tags
+        await PostTag.destroy({ where: { post_id: id }, transaction });
         for (let tagId of tags) {
-          await PostTag.create(
-            {
-              post_id: id,
-              tag_id: tagId,
-            },
-            { transaction }
-          );
+          await PostTag.create({ post_id: id, tag_id: tagId }, { transaction });
         }
       }
 
       // Commit the transaction
       await transaction.commit();
-
-      // Return the updated post record as a response
       return jsonResponse({ statusCode: 200, msg: "Data berhasil diperbarui" }, 200);
     } catch (error) {
-      // Roll back the transaction in case of error
       await transaction.rollback();
       console.error('Error updating post:', error);
       return jsonResponse({ msg: "Error updating post" }, 500);
@@ -265,6 +251,7 @@ export const PUT = async (req, res) => {
 };
 
 
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   try {
@@ -272,7 +259,7 @@ export async function GET(req) {
     const page = parseInt(searchParams.get('page')) || 1;  // Default halaman 1
     const pageSize = parseInt(searchParams.get('pageSize')) || 10;  // Default 10 item per halaman
 
-
+    const search = searchParams.get('search') || '';
     const lastCreatedAt = searchParams.get('lastCreatedAt') || null;  // Mendapatkan createdAt dari item terakhir yang dimuat sebelumnya
     const all = searchParams.get('all');
     if (all) {
@@ -288,6 +275,9 @@ export async function GET(req) {
         [Op.lt]: new Date(lastCreatedAt),
       };
     }
+    if (search) {
+      whereCondition.title = { [Op.like]: `%${search}%` };  
+  }
 
     // Ambil data dengan kondisi dan urutan DESC berdasarkan createdAt
     const posts = await Post.findAll({
@@ -298,27 +288,27 @@ export async function GET(req) {
         {
           model: Genre,
           as: 'genres',
-          attributes: ['id','name'],
+          attributes: ['id', 'name'],
           through: { attributes: [] },
         },
         {
           model: Tag,
           as: 'tags',
-          attributes: ['id','name'],
+          attributes: ['id', 'name'],
           through: { attributes: [] },
         },
         {
           model: Episode,
-          attributes: ['id','title','createdAt'],
+          attributes: ['id', 'title', 'createdAt'],
           include: {
-              model: PostLink,
-              separate: true, // Mengaktifkan pemisahan pengurutan
-              order: [['quality', 'asc']], // Urutan yang benar
+            model: PostLink,
+            separate: true, // Mengaktifkan pemisahan pengurutan
+            order: [['quality', 'asc']], // Urutan yang benar
           },
           separate: true, // Mengaktifkan pemisahan pengurutan
           order: [['title', 'asc']], // Urutan yang benar
 
-      }
+        }
       ],
     });
 
@@ -350,12 +340,13 @@ export const DELETE = async (req, res) => {
   const { searchParams } = new URL(req.url);
   try {
     // Ambil ID dari query params
-    const id = searchParams.get('id')
+    const id = searchParams.get('id');
 
     // Validasi jika ID tidak diberikan
     if (!id) {
       return jsonResponse({ msg: "Post ID is required" }, 400);
     }
+
     // Cari post berdasarkan ID
     const post = await Post.findOne({ where: { id } });
 
@@ -364,23 +355,25 @@ export const DELETE = async (req, res) => {
       return jsonResponse({ msg: "Post not found" }, 404);
     }
 
-    // Jika ada gambar terkait, hapus file gambar dari server
+    // Jika ada gambar terkait, hapus gambar dari Cloudinary
     if (post.image) {
-      const imagePath = path.join(process.cwd(), 'public', post.image);
+      // Ambil `public_id` dari URL Cloudinary
+      const imageUrlParts = post.image.split('/');
+      const publicIdWithExtension = imageUrlParts.slice(-2).join('/'); // Ambil 2 segmen terakhir dari URL
+      const publicId = publicIdWithExtension.split('.').slice(0, -1).join('.'); // Hilangkan ekstensi file
+
       try {
-        fs.unlinkSync(imagePath); // Hapus file
+        // Hapus gambar dari Cloudinary
+        await cloudinary.uploader.destroy(publicId, { resource_type: 'image' });
       } catch (err) {
-        console.warn('Error deleting image file:', err.message);
+        console.warn('Error deleting image from Cloudinary:', err.message);
       }
     }
 
-
+    // Hapus post dari database
     await Post.destroy({ where: { id } });
 
-
-
     return jsonResponse({ msg: "Post deleted successfully" }, 200);
-
   } catch (error) {
     console.error('Error processing delete request:', error);
     return jsonResponse({ msg: "Error processing delete request" }, 500);

@@ -19,6 +19,7 @@ import { Badge } from "../ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import { useRouter } from "next/navigation";
 import { Search as SearchIcon } from "lucide-react";
+import Link from "next/link";
 
 
 export default function Search({ placeholder }) {
@@ -58,14 +59,14 @@ export default function Search({ placeholder }) {
     const navigate = useRouter()
 
     const handleNavigate = (slug) => {
+
         setOpen(false)
-        navigate.push(`/${slug}`)
     }
 
     return (
         <div className="relative">
 
-            <SearchIcon onClick={() => setOpen(true)} className="cursor-pointer"/>
+            <SearchIcon onClick={() => setOpen(true)} className="cursor-pointer" />
             <Drawer open={open} onOpenChange={setOpen}>
 
                 <DrawerContent>
@@ -85,7 +86,7 @@ export default function Search({ placeholder }) {
                         </div>
                         <div className="mt-2 ">
                             {isLoading &&
-                                <div className="grid md:grid-cols-3 grid-cols-2 gap-2">
+                                <div className="grid md:grid-cols-3 grid-cols-1 gap-2">
                                     <Skeleton className={"w-full h-[150px] rounded-md"} />
                                     <Skeleton className={"w-full h-[150px] rounded-md"} />
                                     <Skeleton className={"w-full h-[150px] rounded-md"} />
@@ -93,10 +94,10 @@ export default function Search({ placeholder }) {
                                 </div>}
                             {isError && <div>Something went wrong</div>}
                             {data?.data?.length === 0 && <div>No data found</div>}
-                            <div className="grid md:grid-cols-3 grid-cols-2 gap-2 ">
+                            <div className="grid md:grid-cols-3 grid-cols-1 gap-2 ">
                                 {data?.data?.map((e, i) => (
-                                    <div key={i} className="flex gap-2 border p-2 rounded-md cursor-pointer" onClick={() => handleNavigate(e.slug)}>
-                                        <div>
+                                    <Link href={`/${e.slug}`} key={i} className="flex gap-2 w-full border p-2 rounded-md cursor-pointer" onClick={() => handleNavigate(e.slug)}>
+                                        <div> 
                                             <Image height="100" width="100" src={e.image} alt={e.title} />
                                         </div>
                                         <div className="space-y-2">
@@ -119,7 +120,7 @@ export default function Search({ placeholder }) {
                                             </div>
                                             <p className='text-xs text-gray-600'>{e?.description?.length > 100 ? `${e.description.slice(0, 100)}...` : e?.description}</p>
                                         </div>
-                                    </div>
+                                    </Link>
 
                                 ))}
                             </div>

@@ -76,7 +76,7 @@ export async function generateMetadata({ params }) {
     }
 
   } catch (error) {
-    console.error('Error processing content:', error);
+    
   }
 
   const canonicalUrl = `${process.env.NEXTAUTH_URL}/${data.slug}`;

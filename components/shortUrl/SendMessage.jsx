@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
 import { Button } from "../ui/button";
@@ -19,6 +20,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 import { Skeleton } from "../ui/skeleton";
+import { Checkbox } from "../ui/checkbox";
 
 export default function SendMessage({ isOpen, setIsOpen, datas }) {
 
@@ -28,11 +30,11 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
         channelIds: [],
     });
     const { toast } = useToast();
-    const [withIcon,setWithIcon] = useState(false)
+    const [withIcon, setWithIcon] = useState(false)
     const titleIcon = withIcon ? "🎬 " : '';
     const ratingIcon = withIcon ? "⭐ " : '';
-    const genreIcon = withIcon ? "🎭 " :'';
-    const overviewIcon = withIcon ? "📜 " :'';
+    const genreIcon = withIcon ? "🎭 " : '';
+   
     const handleClick = async (data) => {
         const detail = await axios.get(`/api/movie/detail?id=${data.id}&type=${data.media_type}`);
         const datas = detail.data.data;
@@ -42,13 +44,13 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
 
         // Define Unicode emojis or other icons for better presentation
 
-        
+
         setFormData((prev) => ({
             ...prev,
             message: `${titleIcon}*Title*: ${data.name ? data.name : data?.title}\n` +
                 `${ratingIcon}*Rating*: ${data.vote_average} / ${data.vote_count} votes\n` +
                 `${genreIcon}*Genre*: ${genres}\n\n` +
-                `${overviewIcon}*Overview*: \n${data.overview}`,
+                `720p : \n480p : \n360p : ` ,
             poster_path: data.poster_path,
         }));
     };
@@ -72,6 +74,7 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
     };
 
     const handleChannelSelection = (e) => {
+      
         const value = e.target.value;
         setFormData((prev) => {
             const updatedChannelIds = e.target.checked
@@ -85,6 +88,15 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
             };
         });
     };
+    const handleCheckAll = (e) => {
+        const checked = e.target.checked;
+        const allChannelIds = data?.data?.map((channel) => channel.id_chanel);
+        setFormData((prev) => ({
+            ...prev,
+            channelIds: checked ? allChannelIds : [],
+        }));
+    };
+   
 
     const { mutate, isPending } = useMutation({
         mutationFn: async (e) => {
@@ -140,11 +152,11 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
         }
     };
 
-    useEffect(()=>{
-           
-            movieData.refetch()
-        
-    },[query])
+    useEffect(() => {
+
+        movieData.refetch()
+
+    }, [query])
 
 
 
@@ -186,20 +198,33 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
                                     />
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <Switch id="airplane-mode" checked={withIcon} onCheckedChange={(e)=>setWithIcon(!withIcon)}/>
+                                    <Switch id="airplane-mode" checked={withIcon} onCheckedChange={(e) => setWithIcon(!withIcon)} />
                                     <Label htmlFor="airplane-mode">With Icon ?</Label>
                                 </div>
                                 <div>
                                     <Label>Channel</Label>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <input
+                                            type="checkbox"
+                                            id="checkAll"
+                                            onChange={handleCheckAll}
+                                            checked={formData.channelIds.length === data?.data?.length}
+                                        />
+                                        <Label htmlFor="checkAll">Select All</Label>
+                                    </div>
                                     <div className="grid grid-cols-3 gap-2">
                                         {isLoading ? 'Loading....' : data?.data?.map((channel, i) => (
                                             <div key={i} className="flex gap-2 items-start">
-                                                <input
+                                                <Checkbox
                                                     id={channel.id_chanel}
-                                                    type="checkbox"
+                                                   
                                                     value={channel.id_chanel}
-                                                    onChange={handleChannelSelection}
+                                                    checked={formData.channelIds.includes(channel.id_chanel)} // Menggunakan 'checked' daripada 'defaultChecked'
+                                                    onCheckedChange={(e) => handleChannelSelection({
+                                                        target: { value: channel.id_chanel, checked: e }
+                                                    })}
                                                 />
+
                                                 <label htmlFor={channel.id_chanel} key={channel.id_chanel} className="flex items-center gap-2 text-xs">
                                                     {channel.title}
                                                 </label>

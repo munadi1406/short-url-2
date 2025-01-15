@@ -53,7 +53,7 @@ export default async function Navbar() {
                 <h1
                     className={`text-5xl font-bold p-4 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent ${oswald.className}`}
                 >
-                    Drakoran
+                    Lyco
                 </h1>
             </Link>
 

@@ -18,7 +18,7 @@ export default function Data() {
                 setStats(response.data);
                 setLoading(false);
             } catch (error) {
-                console.error('Failed to fetch visitor stats:', error);
+               
                 setLoading(false);
             }
         };
