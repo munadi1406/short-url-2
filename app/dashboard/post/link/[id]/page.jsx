@@ -8,7 +8,9 @@ const getData = async (id) => {
   const data = await Post.findByPk(id, { attributes: ['id', 'title'] })
   return data
 }
-
+export const metadata = {
+  title: "Link Post"
+}
 
 export default async function page({ params }) {
   const { id } = await params

@@ -37,7 +37,7 @@ const data = {
   },
   teams: [
     {
-      name: "Acme Inc",
+      name: "DCRYPT DATA CENTER",
       logo: GalleryVerticalEnd,
       plan: "Enterprise",
     },

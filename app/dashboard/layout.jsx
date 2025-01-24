@@ -8,15 +8,19 @@ import {
     SidebarProvider,
     SidebarTrigger,
 } from "@/components/ui/sidebar"
-// import { getUser } from "@/lib/dal"
-// import { redirect } from "next/navigation"
+export const metadata = {
+    title: {
+        template: '%s | DCRYPT',
+        default: 'DCRYPT',
+    },
+    robots: {
+        index: false,
+        follow: false,
+    }
+}
 
 export default async function layout({ children }) {
- 
-
     return (
-
-
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
@@ -33,8 +37,8 @@ export default async function layout({ children }) {
                     </div>
                 </div>
                 <Toaster />
-                <ToastSonner/>
-                
+                <ToastSonner />
+
             </SidebarInset>
         </SidebarProvider>
 

@@ -17,8 +17,10 @@ export async function generateMetadata({ params }) {
   return {
     title: urls ? urls.title : 'Page Not Found',
     description: urls ? `Explore links for ${urls.title}` : 'No links available',
+    robots: "noindex, nofollow",
   };
 }
+
 
 export default async function Page({ params }) {
   const { slug } = params;

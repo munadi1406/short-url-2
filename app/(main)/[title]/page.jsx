@@ -11,6 +11,7 @@ import React from 'react';
 import { Op, Sequelize } from 'sequelize';
 import SkeletonLoading from './loading';
 import dynamic from 'next/dynamic';
+import PostView from '@/models/postView';
 const GradientCard = dynamic(() => import('@/components/main/GradientColorImage'), {
     loading: () => <SkeletonLoading />, // Skeleton loading sebagai fallback
 });
@@ -59,11 +60,10 @@ export async function generateMetadata({ params }) {
         };
     }
 
-    const metaTitle = `${data.title} - Lyco`;
-    const metaDescription = data.description || 'No description available for this post.';
-    const postUrl = `${process.env.NEXT_PUBLIC_ENDPOINT_URL || 'http://localhost:3000'}/post/${data.slug}`;
+    const metaTitle = `Drama Korea ${data.title} - Lyco`;
+    const metaDescription = `Drama Korea ${data.title}-${data.description}` || 'No description available for this post.';
+    const postUrl = `${process.env.NEXT_PUBLIC_ENDPOINT_URL || 'http://localhost:3000'}${data.slug}`;
     const imageUrl = data.image || `${process.env.NEXT_PUBLIC_ENDPOINT_URL || 'http://localhost:3000'}/default-image.jpg`;
-
     return {
         title: metaTitle,
         description: metaDescription,
@@ -81,6 +81,9 @@ export async function generateMetadata({ params }) {
             description: metaDescription,
             image: imageUrl,
             site: '@Lyco',
+        },
+        alternates: {
+            canonical: postUrl, // Menambahkan canonical di sini
         },
     };
 }
@@ -118,40 +121,49 @@ export default async function page({ params }) {
     if (!data) {
         return <h3 className='text-center text-3xl'>Not Found</h3>
     }
+    try {
+        await PostView.create({
+            post_id: data.id,
+        });
+
+    } catch (error) {
+
+
+    }
     const episodes = JSON.parse(JSON.stringify(data.episodes));
     const relatedPosts = await getRelatedPosts(data.genres, data.id);
 
-    const postUrl = `${process.env.NEXT_PUBLIC_ENDPOINT_URL}/${data.slug}`;
 
-    // JSON-LD yang sudah dihasilkan dari generateMetadata
+
     const jsonLd = {
         "@context": "https://schema.org",
-        "@type": "TVSeries",
-        "name": data.title,
-        "description": data.description,
-        "url": postUrl,
-        "image": data.image,
-        "genre": data.genres.map(genre => genre.name).join(', '),
-        "keywords": data.tags.map(tag => tag.name).join(', '),
-        "totalEpisodes": data.total_episode,
-        "trailer": data.trailer,
-        "datePublished": data.createdAt,
-        "sameAs": postUrl,
-        "publisher": {
-            "@type": "Organization",
-            "name": "Hobbba",
-            "url": `${process.env.NEXT_PUBLIC_ENDPOINT_URL}`,
-        },
-        "author": {
-            "@type": "Person",
-            "name": "Hobbba",
-        },
-        "episode": data.episodes.map(episode => ({
-            "@type": "Episode",
-            "name": episode.title,
-            "url": `${process.env.NEXT_PUBLIC_ENDPOINT_URL}/${data.slug}`,
-
-        })),
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": `${process.env.NEXT_PUBLIC_ENDPOINT_URL}`
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Ongoing",
+                "item": `${process.env.NEXT_PUBLIC_ENDPOINT_URL}tag/ongoing`
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Completed",
+                "item": `${process.env.NEXT_PUBLIC_ENDPOINT_URL}tag/completed`
+            },
+            {
+                "@type": "ListItem",
+                "position": 4,
+                "name": data.title,
+                "item": `${process.env.NEXT_PUBLIC_ENDPOINT_URL}${data.slug}`
+            }
+        ]
     };
 
 
@@ -161,7 +173,7 @@ export default async function page({ params }) {
             <script type="application/ld+json">
                 {JSON.stringify(jsonLd)}
             </script>
-         
+
             <div className="w-full flex flex-col gap-2 items-start">
                 <div className="w-full space-y-6">
                     <GradientCard data={data.toJSON()} className="px-4 shadow-md rounded-md py-2 " />
@@ -186,8 +198,12 @@ export default async function page({ params }) {
                                                 alt={post.title}
                                                 fill
                                                 style={{ objectFit: 'cover' }}
+                                                quality={70}
+                                                loading='lazy'
                                                 className="rounded-md"
+                                                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"  // Menyesuaikan dengan lebar viewport
                                             />
+
                                         </div>
                                         <div>
                                             <h4 className="text-sm font-semibold">

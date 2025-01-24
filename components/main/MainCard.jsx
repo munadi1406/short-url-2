@@ -14,8 +14,8 @@ export default function MainCard({ post }) {
     return (
         <Link href={`/${post.slug}`} className="hover:scale-105 transition-transform duration-300 ease-in-out">
             <div className="relative">
-             
-                
+
+
                 <Image
                     src={`${post.image}`}
                     alt={post.title}
@@ -23,9 +23,10 @@ export default function MainCard({ post }) {
                     height={150}
                     className="rounded-md"
                     itemProp="image"
+                    loading='lazy'
                 />
                 <div className="flex flex-wrap gap-2 w-full p-2 absolute bottom-0">
-                    {post.genres.map((genre, subIndex) => (
+                    {post.genres.slice(0, 3).map((genre, subIndex) => (
                         <div key={subIndex}>
                             <span
                                 className={`${badgeColors[subIndex % badgeColors.length]} text-xs px-2 py-1 rounded-md`}
@@ -36,6 +37,7 @@ export default function MainCard({ post }) {
                         </div>
                     ))}
                 </div>
+
             </div>
             <div className='py-2 flex flex-wrap gap-2'>
                 {post?.tags?.map((tags, subIndex) => (

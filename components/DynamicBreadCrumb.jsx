@@ -3,11 +3,11 @@ import { useRouter, usePathname } from 'next/navigation';
 import {
     Breadcrumb,
     BreadcrumbItem,
-    BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import React from 'react'
+import Link from 'next/link';
 
 const DynamicBreadcrumb = () => {
     const router = useRouter();
@@ -29,9 +29,9 @@ const DynamicBreadcrumb = () => {
             return (
                 <React.Fragment key={index}>
                     <BreadcrumbItem>
-                        <BreadcrumbLink href={path}>
+                        <Link href={path}>
                             {item.charAt(0).toUpperCase() + item.slice(1)}  {/* Mengkapitalisasi huruf pertama */}
-                        </BreadcrumbLink>
+                        </Link>
                     </BreadcrumbItem>
                     {/* Separator hanya ditampilkan jika bukan item terakhir */}
                     {index < breadcrumbItems.length - 1 && (

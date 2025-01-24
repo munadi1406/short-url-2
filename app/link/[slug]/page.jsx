@@ -3,6 +3,7 @@ import { literal } from 'sequelize';
 export const metadata = {
   title: "Redirecting...",
   description: "Redirecting...",
+  robots: "noindex, nofollow",
 };
 export default async function page({ params }) {
   const data = await Article.findOne({

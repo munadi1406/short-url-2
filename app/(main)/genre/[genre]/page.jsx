@@ -2,6 +2,7 @@ import MainCard from '@/components/main/MainCard';
 import { Genre } from '@/models/genre';
 import Post from '@/models/post';
 import { Tag } from '@/models/tag';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 
@@ -38,14 +39,14 @@ export async function generateMetadata({ params }) {
     const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL || 'http://localhost:3000';
     const title = `Drama Korea ${genre} - Lyco `;
     const description = `Drama Korea ${genre} - Lyco - Download Drama Korea Subtitle Indonesia `;
-
+    const canonicalUrl = `${endpoint}genre/${genre}`;
     return {
         title,
         description,
         openGraph: {
             title,
             description,
-            url: `${endpoint}/genre/${genre}`,
+            url: `${endpoint}genre/${genre}`,
             type: 'website',
             siteName: 'Lyco',
         },
@@ -55,6 +56,9 @@ export async function generateMetadata({ params }) {
             description,
             site: '@Lyco',
         },
+        alternates: {
+            canonical: canonicalUrl, // Menambahkan canonical di sini
+          },
     };
 }
 
@@ -111,7 +115,7 @@ export default async function Page({ params, searchParams }) {
                             href={`/?page=${page - 1}`}
                             className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
                         >
-                            Previous
+                            <ChevronLeft />
                         </Link>
                     )}
 
@@ -136,7 +140,7 @@ export default async function Page({ params, searchParams }) {
                             href={`/?page=${page + 1}`}
                             className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
                         >
-                            Next
+                             <ChevronRight />
                         </Link>
                     )}
                 </div>

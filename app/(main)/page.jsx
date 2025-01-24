@@ -1,7 +1,9 @@
 import MainCard from '@/components/main/MainCard';
+// import LogSend from '@/lib/LogSend';
 import { Genre } from '@/models/genre';
 import Post from '@/models/post';
 import { Tag } from '@/models/tag';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 const getData = async (page = 1, limit = 10) => {
@@ -37,7 +39,7 @@ const getData = async (page = 1, limit = 10) => {
     });
     return data;
   } catch (error) {
-   
+
     return { rows: [], count: 0 };
   }
 };
@@ -48,22 +50,26 @@ export async function generateMetadata({ searchParams }) {
   const page = parseInt(searchParamsResolved.page || '1', 10);
   const title = page > 1 ? `Page ${page} - Lyco` : `Lyco - Download Drama Korea Subtitle Indonesia`;
   const description = `Download Drama Korea Subtitle Indonesia`;
-
+  const canonicalUrl = page > 1 ? `${endpoint}?page=${page}` : `${endpoint}`;
   return {
     title,
     description,
+    robots: 'index, follow',
     openGraph: {
       title,
       description,
       url: `${endpoint}?page=${page}`,
       type: 'website',
-      siteName: 'Example Site',
+      siteName: 'Lyco',
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      site: '@ExampleSite',
+      site: '@lyco',
+    },
+    alternates: {
+      canonical: canonicalUrl, // Menambahkan canonical di sini
     },
   };
 }
@@ -74,7 +80,7 @@ export default async function Home({ searchParams }) {
   const limit = 10;
 
   const { rows: posts, count } = await getData(page, limit);
-  
+
   const totalPages = Math.ceil(count / limit);
 
   // Generate range of pages
@@ -84,18 +90,21 @@ export default async function Home({ searchParams }) {
   const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL;
   const jsonLdData = {
     "@context": "https://schema.org",
-    "@type": "ItemList",
-    itemListElement: posts.map((post, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      url: `${endpoint}${post.slug}`,
-      name: post.title,
-    })),
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": `${endpoint}`
+      }
+    ]
   };
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }} />
+      {/* <LogSend/> */}
       <div
         className="py-4 grid md:grid-cols-4 grid-cols-2 gap-4 w-full"
         itemScope
@@ -103,7 +112,7 @@ export default async function Home({ searchParams }) {
       >
         {posts.map((post, i) => (
           <MainCard post={post} key={i} />
-    
+
         ))}
       </div>
 
@@ -114,7 +123,7 @@ export default async function Home({ searchParams }) {
               href={`/?page=${page - 1}`}
               className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
             >
-              Previous
+              <ChevronLeft />
             </Link>
           )}
 
@@ -139,7 +148,7 @@ export default async function Home({ searchParams }) {
               href={`/?page=${page + 1}`}
               className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
             >
-              Next
+              <ChevronRight />
             </Link>
           )}
         </div>

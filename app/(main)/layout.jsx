@@ -2,6 +2,8 @@ import Navbar from '@/components/main/Navbar'
 import React from 'react'
 import { Nunito_Sans } from 'next/font/google';
 import Popular from '@/components/main/Popular';
+import LogSender from '@/lib/LogSender';
+import RecoredVisitors from '@/components/visitor/RecordVisitors';
 
 
 
@@ -10,10 +12,19 @@ const nunito = Nunito_Sans({
     display: 'swap',
     weight: ['400', '500', '600', '700']
 })
+export const metadata = {
+    robots: {
+        index: true,
+        follow: true,
+    },
+}
 
-export default function layout({ children }) {
+
+export default async function layout({ children }) {
     return (
         <>
+            <RecoredVisitors />
+            <LogSender />
             <Navbar />
             <div className={`flex md:flex-row md:mb-0 mb-8 flex-col relative  w-full min-h-screen p-4 ${nunito.className}`}>
                 <div className='md:w-4/6 w-full'>
