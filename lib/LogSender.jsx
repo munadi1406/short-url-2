@@ -11,7 +11,7 @@ async function getIpAddress() {
     const data = await response.json();
     return data.ip;
   } catch (error) {
-    console.error("Error fetching IP address:", error);
+   
     return "Unknown";
   }
 }
@@ -40,11 +40,11 @@ export default function LogSender() {
   const getSession = async () => {
     try {
       const datass = await createCookie();
-      console.log("Session retrieved:", { datass });
+    
       setSessionId(datass?.sessionId);
       setAccessToken(datass?.accessToken);
     } catch (error) {
-      console.error("Error getting session:", error);
+      
     }
   };
 
@@ -63,7 +63,7 @@ export default function LogSender() {
         os,
       };
     } catch (error) {
-      console.error("Error preparing log data:", error);
+     
       return null;
     }
   };
@@ -77,7 +77,7 @@ export default function LogSender() {
   const initializeSocket = () => {
     if (!sessionId || !accessToken || isSocketConnected.current) return; // Tidak inisialisasi jika sudah terhubung
 
-    console.log("Initializing WebSocket connection...");
+   
 
     const socket = io(process.env.NEXT_PUBLIC_API_ENDPOINT, {
       auth: {
@@ -87,20 +87,20 @@ export default function LogSender() {
 
     // Saat berhasil terhubung
     socket.on("connect", async () => {
-      console.log("Connected to WebSocket server");
+  
       const data = await getData("active");
       if (data) {
         socket.emit("logData", data);
-        console.log("Active log data sent");
+   
       }
     });
 
     // Saat terputus
     socket.on("disconnect", async (reason) => {
-      console.log("Disconnected from WebSocket server:", reason);
+     
 
       if (isOnline()) {
-        console.log("Device is online, refreshing session...");
+      
         await getSession(); // Refresh sessionId dan accessToken
         
         // Jika reconnect belum pernah dicoba atau sudah lama, maka coba reconnect
@@ -114,10 +114,10 @@ export default function LogSender() {
           }, 2000); // Waktu tunggu 2 detik (sesuaikan dengan kebutuhan Anda)
         }
       } else {
-        console.log("Device is offline, waiting for connection to restore...");
+      
         // Menunggu sampai perangkat kembali online
         window.addEventListener("online", async () => {
-          console.log("Device is back online, refreshing session...");
+       
           await getSession();
 
           // Jika ada timeout sebelumnya, bersihkan
@@ -141,7 +141,7 @@ export default function LogSender() {
     return () => {
       if (socket) {
         socket.disconnect();
-        console.log("WebSocket disconnected on component unmount");
+      
         isSocketConnected.current = false;
       }
     };

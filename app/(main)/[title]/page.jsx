@@ -90,7 +90,10 @@ export async function generateMetadata({ params }) {
 const getRelatedPosts = async (genres, excludePostId) => {
     // Attempt to fetch related posts
     let relatedPosts = await Post.findAll({
-        where: { id: { [Op.ne]: excludePostId } },
+        where: {
+            id: { [Op.ne]: excludePostId },
+            status: 'publish',
+        },
         include: [
             {
                 model: Genre,
@@ -105,7 +108,7 @@ const getRelatedPosts = async (genres, excludePostId) => {
     // If no related posts found, fetch random posts
     if (relatedPosts.length === 0) {
         relatedPosts = await Post.findAll({
-            where: { id: { [Op.ne]: excludePostId } },
+            where: { id: { [Op.ne]: excludePostId },status:"publish" },
             include: [{ model: Genre, as: 'genres', through: { attributes: [] } }],
             order: Sequelize.literal('RAND()'),
             limit: 5

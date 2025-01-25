@@ -63,7 +63,8 @@ export default async function Navbar() {
                 <Link href="/tag/completed">Completed</Link>
                 <DropdownMenu>
                     <DropdownMenuTrigger>Genre</DropdownMenuTrigger>
-                    <DropdownMenuContent>
+                    <DropdownMenuContent className="max-h-[70vh] overflow-auto">
+                        
                         {genres.map((e, i) => (
                             <Link key={i} href={`/genre/${e.name}`}>
                                 <DropdownMenuItem key={i}>{e.name}</DropdownMenuItem>
@@ -83,7 +84,7 @@ export default async function Navbar() {
                     ))}
                     <DropdownMenu>
                         <DropdownMenuTrigger className='active:scale-95'><ChartBarStacked /></DropdownMenuTrigger>
-                        <DropdownMenuContent>
+                        <DropdownMenuContent className="max-h-[70vh] overflow-auto">
                             {genres.map((e, i) => (
                                 <Link key={i} href={`/genre/${e.name}`} >
                                     <DropdownMenuItem key={i}>{e.name}</DropdownMenuItem>

@@ -42,9 +42,13 @@ const getData = async (limit = 5) => {
                             },
                         },
                     ],
+                    where: {
+                        status: 'publish',
+                    },
                 },
             ],
             required: true, // Mengambil hanya yang memiliki relasi dengan post
+
         });
 
         // Memetakan data hasil query dan format sesuai kebutuhan
@@ -60,7 +64,7 @@ const getData = async (limit = 5) => {
             tags: view.post.tags.map((tag) => tag.name), // Ambil nama tag
         }));
     } catch (error) {
-        console.error('Error fetching popular posts:', error);
+
         return [];
     }
 };
@@ -84,15 +88,19 @@ export default async function Popular() {
                 {popular.map((post, i) => (
                     <div key={i} className="grid grid-cols-3 gap-4 border rounded-md p-2">
                         <div className="relative">
-                            <Link href={`/${post.slug}`}>
+                            <Link href={`/${post.slug}`} style={{ height: "auto" }} className='relative w-24 block'>
                                 <Image
                                     src={post.image}
                                     alt={post.title}
-                                    height="500"
-                                    width="500"
+
+                                    width="0"
+                                    height="0"
+                                    sizes="100vw"
+                                    className="w-full h-auto"
                                     itemProp="image"
-                                    sizes='100vw'
+
                                     quality={70}
+                                    loading='lazy'
                                 />
                             </Link>
                         </div>

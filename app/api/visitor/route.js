@@ -7,7 +7,9 @@ export async function POST(request) {
       const { page, slug } = await request.json();
       
       // Mendapatkan IP address pengunjung
-      const ipAddress = request.headers.get('x-forwarded-for') || request.socket.remoteAddress;
+      const forwardedFor = request.headers.get('x-forwarded-for');
+      const ipAddress = forwardedFor ? forwardedFor.split(',')[0].trim() : request.socket.remoteAddress;
+      const cleanIpAddress = ipAddress.startsWith('::ffff:') ? ipAddress.substring(7) : ipAddress;
   
       // Mendapatkan userAgent dari request header
       const userAgent = request.headers.get('user-agent');
@@ -31,11 +33,12 @@ export async function POST(request) {
       // Menyimpan data visitor di database
       const visitorStat = await VisitorStat.create({
         page,
-        ipAddress,
+        ipAddress:cleanIpAddress,
         userAgent,
         visitedAt: new Date(),  // Waktu sekarang
         articleId,  // Menyimpan articleId, bisa null jika tidak ditemukan
       });
+    
   
       // Mengembalikan response sukses
       return new Response(JSON.stringify(visitorStat), {

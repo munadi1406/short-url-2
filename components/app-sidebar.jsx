@@ -130,6 +130,25 @@ const data = {
         },
       ],
     },
+    {
+      title: "Logs",
+      url: "#",
+      icon: Settings2,
+      items: [
+        {
+          title: "Users",
+          url: "/dashboard/logs/users",
+        },
+        {
+          title: "Visitors",
+          url: "/dashboard/logs/visitors",
+        },
+        {
+          title: "Others",
+          url: "/dashboard/logs/others",
+        },
+      ],
+    },
   ],
   projects: [
     {

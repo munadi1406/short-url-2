@@ -59,9 +59,7 @@ const GradientCard = ({ data, ...props }) => {
                 }
             };
 
-            img.onerror = (error) => {
-                console.error('Error loading image:', error);
-            };
+           
         }
     }, [data?.image]);
 

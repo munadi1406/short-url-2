@@ -19,10 +19,12 @@ export default function MainCard({ post }) {
                 <Image
                     src={`${post.image}`}
                     alt={post.title}
-                    width={200}
-                    height={150}
-                    className="rounded-md"
+                    width="0"
+                    height="0"
+                    sizes="100vw"
+                    className="w-full h-auto rounded md"
                     itemProp="image"
+                    quality={70}
                     loading='lazy'
                 />
                 <div className="flex flex-wrap gap-2 w-full p-2 absolute bottom-0">
