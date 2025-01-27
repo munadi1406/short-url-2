@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import ReactQueryProvider from '@/lib/ReactQueryProvider'
-
+import LogSender from '@/lib/LogSender';
 import NextTopLoader from 'nextjs-toploader';
 
 
@@ -34,7 +34,7 @@ export default async function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextTopLoader />
-
+        <LogSender/>
         <ReactQueryProvider>
           {children}
         </ReactQueryProvider>

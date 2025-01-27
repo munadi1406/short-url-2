@@ -1,6 +1,6 @@
 'use client'
 
-import { Skeleton } from '@shadcn/ui'; // Import Skeleton dari Shadcn UI
+import { Skeleton } from "../ui/skeleton";
 
 export default function VisitorsDetailSkeleton() {
     return (

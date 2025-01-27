@@ -24,7 +24,7 @@ import OtherSkeleton from './OtherSkeleton'
 export default function OthersStat() {
 
     const { data, isLoading } = useQuery({
-        queryKey: ['usersDetailStat'], queryFn: async () => {
+        queryKey: ['othersDetailStat'], queryFn: async () => {
             const datas = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/logs/other`)
             return datas.data.data
         },
