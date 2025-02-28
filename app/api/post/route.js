@@ -44,7 +44,7 @@ export const POST = async (req, res) => {
     const airTime = formData.get('airTime');
     const totalEpisode = formData.get('totalEpisode');
     const trailer = formData.get('trailer');
-    
+
     const genres = formData.getAll('genres[]'); // 'genres' is expected to be an array of genre IDs
     const tags = formData.getAll('tags[]');
 
@@ -139,7 +139,7 @@ export const POST = async (req, res) => {
 
 export const PUT = async (req, res) => {
   try {
-    
+
 
     // Parse the form data
     const formData = await req.formData();
@@ -152,7 +152,7 @@ export const PUT = async (req, res) => {
     const totalEpisode = formData.get('totalEpisode');
     const trailer = formData.get('trailer');
     const type = formData.get('type');
-   
+
     const genres = formData.getAll('genres[]');
     const tags = formData.getAll('tags[]');
     const file = formData.get('file');
@@ -174,7 +174,7 @@ export const PUT = async (req, res) => {
           title,
           description,
           type,
-         
+
           air_time: airTime,
           total_episode: totalEpisode,
           trailer,
@@ -186,11 +186,11 @@ export const PUT = async (req, res) => {
       if (file) {
         // Delete the old photo from Cloudinary if it exists
         if (existingPost.image) {
-          
+
           const imageUrlParts = existingPost.image.split('/');
           const publicIdWithExtension = imageUrlParts.slice(-2).join('/'); // Ambil 2 segmen terakhir dari URL
           const publicId = publicIdWithExtension.split('.').slice(0, -1).join('.'); // Hilangkan ekstensi file
-          console.log({publicId})
+          console.log({ publicId })
           try {
             const test = await cloudinary.uploader.destroy(publicId);
             console.log(test)
@@ -211,7 +211,7 @@ export const PUT = async (req, res) => {
           public_id: `post_${id}_${Date.now()}`,
           overwrite: true,
         });
-        console.log({uploadedImage})
+        console.log({ uploadedImage })
 
         // Update the post image URL
         await existingPost.update(
@@ -260,6 +260,7 @@ export async function GET(req) {
     const pageSize = parseInt(searchParams.get('pageSize')) || 10;  // Default 10 item per halaman
 
     const search = searchParams.get('search') || '';
+    const status = searchParams.get('status') || '';
     const lastCreatedAt = searchParams.get('lastCreatedAt') || null;  // Mendapatkan createdAt dari item terakhir yang dimuat sebelumnya
     const all = searchParams.get('all');
     if (all) {
@@ -276,13 +277,16 @@ export async function GET(req) {
       };
     }
     if (search) {
-      whereCondition.title = { [Op.like]: `%${search}%` };  
-  }
-
+      whereCondition.title = { [Op.like]: `%${search}%` };
+    }
+    if (status) {
+      whereCondition.status = status;
+    }
+    
     // Ambil data dengan kondisi dan urutan DESC berdasarkan createdAt
     const posts = await Post.findAll({
       where: whereCondition,
-      order: [['createdAt', 'DESC']],
+      order: [['updatedAt', 'DESC']],
       limit: pageSize,
       include: [
         {
@@ -310,6 +314,7 @@ export async function GET(req) {
 
         }
       ],
+
     });
 
 

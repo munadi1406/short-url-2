@@ -32,12 +32,11 @@ export default function OthersStat() {
     if (isLoading) {
         return <OtherSkeleton/>
     }
-
     const osStats = {
         labels: data?.osStats?.map(item => item.os),
         datasets: [
             {
-                label: data?.osStats?.map(item => item.os),
+                label: "value",
                 data: data?.osStats?.map(item => item.count),
                 borderColor: '#2563eb',
                 backgroundColor: 'rgba(37, 99, 235, 0.2)',

@@ -40,6 +40,7 @@ const ChartComponent = ({ title = "Chart",serverTime = '',desc="Dynamic Multi-Da
                 <Line data={chartData} options={options} />
             </CardContent>
         </Card>
+        
     );
 };
 

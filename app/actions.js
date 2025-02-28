@@ -2,8 +2,9 @@
 import { isAdmin } from "@/lib/dal";
 import axios from "axios";
 import { cookies } from "next/headers";
-
-export const createCookie = async (asd) => {
+import Article from "@/models/article";
+import { VisitorStat } from "@/models/visistorStat";
+export const createCookie = async () => {
     try {
         // Ambil cookieStore snapshot
         const cookieStore = await cookies();
@@ -41,3 +42,66 @@ export const createCookie = async (asd) => {
         throw error; // Throw error agar error bisa di-handle di tempat lain
     }
 };
+
+
+
+export const recordVisitor = async ({ page, slug, ipAddress, userAgent }) => {
+  try {
+    // Menangani alamat IP
+    const cleanIpAddress = ipAddress.startsWith('::ffff:') ? ipAddress.substring(7) : ipAddress;
+
+    // Validasi data
+    if (!page) {
+      throw new Error("Page is required");
+    }
+
+    // Jika slug diberikan, cari artikel berdasarkan slug
+    let articleId = null;
+    if (slug) {
+      const article = await Article.findOne({ where: { slug } });
+
+      // Jika artikel ditemukan, ambil articleId
+      if (article) {
+        articleId = article.id;
+      }
+    }
+
+    // Menyimpan data visitor di database
+   await VisitorStat.create({
+      page,
+      ipAddress: cleanIpAddress,
+      userAgent,
+      visitedAt: new Date(), // Waktu sekarang
+      articleId, // Menyimpan articleId, bisa null jika tidak ditemukan
+    });
+    return true;
+
+  } catch (error) {
+    console.error("Error recording visitor:", error);
+  }
+};
+
+
+
+
+export const sendLogToApi = async (data) => {
+  if (!data) return;
+  console.log("fungsi jalan-----------------------")
+  try {
+   await axios.post(
+      `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/logs`,
+      data,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      } 
+    );
+    return true;
+  } catch (error) {
+    console.error('❌ Error sending log to API:', error);
+    return false;
+  }
+};
+
+

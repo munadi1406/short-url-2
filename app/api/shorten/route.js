@@ -12,11 +12,11 @@ import { jsonResponse } from '@/lib/jsonResponse';
 
 
 // Fungsi untuk mengambil title dari metadata link
-async function getTitleFromUrl(url) {
+async function getTitleFromUrl(url,title) {
     try {
         const response = await axios.get(url, { timeout: 10000 });
         const $ = load(response.data);
-        const title = $('title').text().trim() || 'No title found';
+        const title = $('title').text().trim() || title;
         return title;
     } catch (error) {
         console.error(`Error fetching title for ${url}:`, error.message);
@@ -26,7 +26,7 @@ async function getTitleFromUrl(url) {
 
 export async function POST(req) {
     const transaction = await sequelize.transaction(); // Mulai transaksi
-    const { title, link,idUrls,type } = await req.json();
+    const { title, link, idUrls, type } = await req.json();
     const { id } = await getUser();
     try {
         // Ambil data dari body request
@@ -41,7 +41,7 @@ export async function POST(req) {
 
             try {
                 new URL(singleLink); // Validasi URL
-                const linkTitle = await getTitleFromUrl(singleLink); // Ambil title dari link
+                const linkTitle = await getTitleFromUrl(singleLink,title); // Ambil title dari link
                 const shortUrl = nanoid(10); // Generate short_url untuk link
 
                 // Simpan link ke tabel 'links'
@@ -53,7 +53,7 @@ export async function POST(req) {
                         short_url: shortUrl,
                         idUsers: userId || null, // Hubungkan ke user jika ada
                     },
-                    { transaction,attributes:['short_url'] }
+                    { transaction, attributes: ['short_url'] }
                 );
 
                 // Commit transaksi
@@ -85,7 +85,7 @@ export async function POST(req) {
             links.map(async (singleLink) => {
                 try {
                     new URL(singleLink); // Validasi URL
-                    const linkTitle = await getTitleFromUrl(singleLink); // Ambil title dari link
+                    const linkTitle = await getTitleFromUrl(singleLink,title); // Ambil title dari link
                     const shortUrl = nanoid(10); // Generate short_url untuk link
 
                     // Simpan setiap link ke tabel 'links'
@@ -97,9 +97,9 @@ export async function POST(req) {
                             short_url: shortUrl,
                             idUsers: userId || null, // Hubungkan ke user jika ada
                         },
-                        { transaction}
+                        { transaction }
                     );
-                 
+
                 } catch (error) {
                     console.error(`Invalid URL: ${singleLink}`, error.message);
                     return null; // Abaikan link yang tidak valid
@@ -108,13 +108,13 @@ export async function POST(req) {
         );
 
         // Filter link yang berhasil disimpan
-        
+
 
         // Commit transaksi
         await transaction.commit();
 
         return jsonResponse({
-            msg:"Link Berhasil Disimpan",
+            msg: "Link Berhasil Disimpan",
             data: {
                 link: `${process.env.ENDPOINT_URL}l/${urlEntry.short_url}`,
             },
@@ -142,7 +142,7 @@ export async function GET(req) {
 
         const lastCreatedAt = searchParams.get('lastCreatedAt') || null;  // Mendapatkan createdAt dari item terakhir yang dimuat sebelumnya
         const category = searchParams.get('category');  // Mendapatkan kategori (null atau true)
-        
+
         const whereCondition = {};
 
         // Menentukan filter berdasarkan kategori dan apakah itu berasal dari Url atau Link
@@ -153,13 +153,13 @@ export async function GET(req) {
             // Jika kategori bukan 'true', kita query Link dengan menggunakan idUsers
             whereCondition.idUsers = idUser;  // Filter berdasarkan idUsers pada Link model
             whereCondition.idurls = {
-                [Op.is]: null,  
+                [Op.is]: null,
             };
         }
         if (search) {
             whereCondition.title = { [Op.like]: `%${search}%` };  // Mencari `title` yang mengandung keyword
         }
-        
+
 
         // Jika lastCreatedAt diberikan, filter untuk mendapatkan data yang lebih baru dari 'lastCreatedAt'
         if (lastCreatedAt) {
@@ -173,14 +173,14 @@ export async function GET(req) {
             order: [['createdAt', 'DESC']],  // Urutkan berdasarkan createdAt secara descending
             limit: pageSize,  // Batasi jumlah item yang diambil per halaman
         };
-     
+
 
         if (category === 'true') {
             // Jika kategori adalah 'true', kita query Url dan include Link
             queryOptions.include = {
                 model: Link,
                 as: 'links',
-                required: true, 
+                required: true,
                 order: [['links.createdAt', 'ASC']],
             };
             const urls = await Url.findAll(queryOptions);  // Mengambil data dari Url
@@ -238,19 +238,27 @@ const validateFields = ({ title, link, id }) => {
 };
 
 export async function PUT(req) {
-    const { title, link, id } = await req.json();
+    const { title, link, id, type } = await req.json();
     try {
-
+        console.log({type})
 
         // Validate input fields
         const validationError = validateFields({ title, link, id });
         if (validationError) {
             return jsonResponse({ msg: validationError }, 400);
         }
-        await Link.update(
-            { title, link },
-            { where: { id } }
-        );
+        if (type === 'link') {
+
+            await Link.update(
+                { title, link },
+                { where: { id } }
+            );
+        } else {
+            await Url.update(
+                { title, link },
+                { where: { id } }
+            );
+        }
 
         return jsonResponse({ msg: "Link Berhasil Diupdate" }, 200);
     } catch (error) {
@@ -271,11 +279,11 @@ export async function DELETE(req) {
             idUsers = checkOwnerLink.idUsers
         }
         const checkOwnerUrls = await Url.findByPk(linkId, { attributes: ['userid'] })
-    
+
         if (checkOwnerUrls) {
             idUsers = checkOwnerUrls.userid
         }
-        
+
 
         const checkIsUrl = await Url.findByPk(linkId);
         if (checkIsUrl) {

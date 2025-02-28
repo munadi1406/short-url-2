@@ -8,6 +8,17 @@ import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { useToast } from '@/hooks/use-toast';
 import { quality } from '@/lib/quality';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 export default function EditLink({ data }) {
   const [episodes, setEpisodes] = useState(
@@ -16,7 +27,13 @@ export default function EditLink({ data }) {
       isSaved: true, // Tambahkan properti isSaved untuk melacak status simpan
     }))
   );
-  
+  const [isDelete, setIsDelete] = useState(false);
+  const [id, setId] = useState(false);
+  const handleClick = (id) => {
+    setId(id)
+    setIsDelete(true)
+  }
+
 
   const { toast } = useToast();
 
@@ -86,9 +103,12 @@ export default function EditLink({ data }) {
     });
   };
 
-  const handleDeleteEpisode = (id) => {
+  const handleDeleteEpisode = () => {
     deleteEpisodeMutation.mutate(id);
   };
+
+
+
 
   const handleAddLink = (episodeIndex) => {
     setEpisodes((prev) => {
@@ -105,6 +125,21 @@ export default function EditLink({ data }) {
 
   return (
     <div>
+      <AlertDialog open={isDelete} onOpenChange={setIsDelete} >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apakah Anda Yakin Ingin Menghapus ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Ketika Sudah Dihapus data tidak bisa dipulihkan kembali
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteEpisode}>Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {episodes.map((episode, episodeIndex) => (
         <div key={episode.id} className="mb-6">
           <div className="flex items-center gap-2 mb-2">
@@ -114,7 +149,7 @@ export default function EditLink({ data }) {
             />
             <Button
               variant="destructive"
-              onClick={() => handleDeleteEpisode(episode.id)}
+              onClick={() => handleClick(episode.id)}
               disabled={deleteEpisodeMutation.isLoading}
             >
               {deleteEpisodeMutation.isLoading ? 'Menghapus...' : 'Hapus Episode'}

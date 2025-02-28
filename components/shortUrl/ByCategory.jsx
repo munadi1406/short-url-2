@@ -144,7 +144,7 @@ export default function ByCateory({ handleClickSendMessage,handleRefetch }) {
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
                                         <Button className="text-xs bg-slate-900" onClick={() => handleAdd(link)}><Plus /> </Button>
                                         <Button onClick={() => handleEdit({ title: link.title, id: link.id, link: `${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${link.short_url}` })}><Wrench /></Button>
-                                        <Link href={`/l/${link.short_url}`} target="_blank" className={`${buttonVariants()} bg-yellow-400 hover:bg-yellow-500`}><Eye /></Link>
+                                        <Link href={`/k/${link.short_url}`} target="_blank" className={`${buttonVariants()} bg-yellow-400 hover:bg-yellow-500`}><Eye /></Link>
                                         <Button onClick={() => handleClickSendMessage({ title: link.title, link: `l/${link.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
                                         <CopyButton textToCopy={`${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${link.short_url}`} />
                                         <DeleteLinkCategory data={link} refetch={refetch} />
@@ -155,7 +155,7 @@ export default function ByCateory({ handleClickSendMessage,handleRefetch }) {
                                 {currentData?.id === link.id && isEdit && (
                                     <TableRow>
                                         <TableCell colSpan="5">
-                                            <EditForm data={currentData} />
+                                            <EditForm data={currentData} type="url"/>
                                         </TableCell>
                                     </TableRow>
                                 )}
@@ -188,13 +188,14 @@ export default function ByCateory({ handleClickSendMessage,handleRefetch }) {
                                                                         <Link href={`/l/${subLink.short_url}`} target="_blank" className={`${buttonVariants()} bg-yellow-400 hover:bg-yellow-500`}><Eye /></Link>
                                                                         <Button onClick={() => handleClickSendMessage({ title: link.subLink, link: `l/${subLink.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
                                                                         <CopyButton textToCopy={`${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${subLink.short_url}`} />
+                                                                        <CopyButton textToCopy={`${subLink.link}`} />
                                                                         <DeleteLink data={subLink} refetch={refetch} />
                                                                     </TableCell>
                                                                 </TableRow>
                                                                 {currentData?.id === subLink.id && isEdit && (
                                                                     <TableRow>
                                                                         <TableCell colSpan="5">
-                                                                            <EditForm data={currentData} />
+                                                                            <EditForm data={currentData} type="link"/>
                                                                         </TableCell>
                                                                     </TableRow>
                                                                 )}

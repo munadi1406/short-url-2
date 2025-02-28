@@ -1,6 +1,6 @@
 import Post from '@/models/post';
 import PostView from '@/models/postView';
-import { Badge, badgeVariants } from '../ui/badge';
+import { badgeVariants } from '../ui/badge';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Genre } from '@/models/genre';
@@ -10,6 +10,9 @@ import { Op } from 'sequelize';
 
 const getData = async (limit = 5) => {
     try {
+        const currentDate = new Date();
+        const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1); // Awal bulan
+        const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0); // Akhir bulan
         // Mengambil data post dari tabel PostView
         const data = await PostView.findAll({
             attributes: [
@@ -47,11 +50,14 @@ const getData = async (limit = 5) => {
                     },
                 },
             ],
+            where: {
+                viewed_at: {
+                    [Op.between]: [startOfMonth, endOfMonth], // Batasi berdasarkan createdAt dalam bulan ini
+                },
+            },
             required: true, // Mengambil hanya yang memiliki relasi dengan post
-
         });
-
-        // Memetakan data hasil query dan format sesuai kebutuhan
+       
         return data.map((view) => ({
             postId: view.post.id,
             title: view.post.title,
@@ -64,7 +70,7 @@ const getData = async (limit = 5) => {
             tags: view.post.tags.map((tag) => tag.name), // Ambil nama tag
         }));
     } catch (error) {
-
+      
         return [];
     }
 };

@@ -157,8 +157,8 @@ const data = {
       icon:GalleryHorizontal,
     },
     {
-      name: "Galery",
-      url: "/dashboard/galery",
+      name: "Maintenance",
+      url: "/dashboard/maintenance",
       icon:GalleryHorizontal,
     },
     {

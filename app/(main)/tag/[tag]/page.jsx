@@ -28,9 +28,9 @@ const getData = async (tag) => {
             attributes: ['name'],
           },
         ],
-        order: [['createdAt', 'DESC']],
       },
     ],
+    order: [[{ model: Post, as: 'posts' }, 'updatedAt', 'DESC']],
   });
   return data;
 };

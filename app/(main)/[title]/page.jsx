@@ -99,24 +99,28 @@ const getRelatedPosts = async (genres, excludePostId) => {
                 model: Genre,
                 as: 'genres',
                 where: { name: genres.map((g) => g.name) },
-                through: { attributes: [] }
-            }
+                through: { attributes: [] },
+            },
         ],
-        limit: 5
+        limit: 5,
     });
 
     // If no related posts found, fetch random posts
     if (relatedPosts.length === 0) {
         relatedPosts = await Post.findAll({
-            where: { id: { [Op.ne]: excludePostId },status:"publish" },
+            where: { id: { [Op.ne]: excludePostId }, status: 'publish' },
             include: [{ model: Genre, as: 'genres', through: { attributes: [] } }],
             order: Sequelize.literal('RAND()'),
-            limit: 5
+            limit: 5,
         });
     }
 
+    // Shuffle the related posts
+    relatedPosts = relatedPosts.sort(() => Math.random() - 0.5);
+
     return relatedPosts;
 };
+
 
 export default async function page({ params }) {
     const { title } = await params;

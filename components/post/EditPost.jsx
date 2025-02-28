@@ -292,7 +292,7 @@ export default function EditPage({ post, refetch }) { // Expect `post` as props
                 </div>
                 <div className='p-2'>
                     <Button type="submit" disabled={isPending}>
-                        {isPending ? 'Loading...' : "Save Changes"}
+                        {isPending ? 'Loading...' : "Simpan"}
                     </Button>
                 </div>
             </form>

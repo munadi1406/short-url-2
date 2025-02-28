@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 
 
 
-export default function EditForm({ data }) {
+export default function EditForm({ data,type }) {
 
     const [hasEdited, setHasEdited] = useState(false);
     const [updateData, setUpdateData] = useState({ title: '', link: '', id: '' })
@@ -27,9 +27,10 @@ export default function EditForm({ data }) {
         setUpdateData({
             title: data.title,
             link: data.link,
-            id: data.id
+            id: data.id,
+            type: type
         })
-    }, [data])
+    }, [data,type])
 
     useEffect(() => {
         const isEdited =
@@ -68,14 +69,14 @@ export default function EditForm({ data }) {
     return (
         <form className="border-l-2 border-blue-600 p-2 flex flex-col gap-1" onSubmit={mutate} method="post">
             {msg && <p className={`" text-sm font-medium leading-none ${textColor}`}>{msg}</p>}
-            <div className="grid md:grid-cols-2 gap-2 grid-cols-1">
+            <div className="grid md:grid-cols-2 gap-2 grid-cols-1 ">
                 <div>
                     <Label htmlFor="editTitle">Judul</Label>
-                    <Input id="editTitle" name="title" value={updateData.title} onChange={handleChange} />
+                    <Input className="text-sm" id="editTitle" name="title" value={updateData.title} onChange={handleChange} />
                 </div>
                 <div>
                     <Label htmlFor="editLink">Link</Label>
-                    <Input id="editLink" name="link" value={updateData.link} onChange={handleChange} />
+                    <Input className="text-sm" id="editLink" name="link" value={updateData.link} onChange={handleChange} />
                 </div>
             </div>
             <div>
