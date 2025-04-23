@@ -77,7 +77,7 @@ export const recordVisitor = async ({ page, slug, ipAddress, userAgent }) => {
     return true;
 
   } catch (error) {
-    console.error("Error recording visitor:", error);
+    // console.error("Error recording visitor:", error);
   }
 };
 
@@ -86,7 +86,7 @@ export const recordVisitor = async ({ page, slug, ipAddress, userAgent }) => {
 
 export const sendLogToApi = async (data) => {
   if (!data) return;
-  console.log("fungsi jalan-----------------------")
+  
   try {
    await axios.post(
       `${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/logs`,
@@ -99,7 +99,7 @@ export const sendLogToApi = async (data) => {
     );
     return true;
   } catch (error) {
-    console.error('❌ Error sending log to API:', error);
+    // console.error('❌ Error sending log to API:', error);
     return false;
   }
 };

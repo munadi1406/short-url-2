@@ -16,6 +16,9 @@ const getData = async (tag) => {
         model: Post,
         as: 'posts',
         through: { attributes: [] },
+        where:{
+          status:"publish"
+        },
         include: [
           {
             model: Genre,
@@ -68,9 +71,9 @@ export async function generateMetadata({ params }) {
 export default async function TagPage({ params, searchParams }) {
   const param = await params;
   const tag = decodeURIComponent(param.tag);
-  const limit = 10;
+  const limit = 12;
   const searchParamsResolved = await searchParams || {};
-  const page = parseInt(searchParamsResolved.page || '1', 10);
+  const page = parseInt(searchParamsResolved.page || '1', 12);
 
   const data = await getData(tag);
 

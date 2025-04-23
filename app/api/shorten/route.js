@@ -20,7 +20,7 @@ async function getTitleFromUrl(url,title) {
         return title;
     } catch (error) {
         console.error(`Error fetching title for ${url}:`, error.message);
-        return 'Error fetching title';
+        return title;
     }
 }
 

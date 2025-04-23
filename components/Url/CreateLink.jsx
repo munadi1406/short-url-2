@@ -8,6 +8,7 @@ import Iklan from '../Iklan/Iklan';
 
 export default function CreateLink() {
     // State untuk menyimpan slug
+    const [clickCount,setClickCount] = useState(0)
     const [slug, setSlug] = useState(null);
 
     // State untuk mengelola tombol yang ditampilkan
@@ -92,8 +93,13 @@ export default function CreateLink() {
     })
 
     const handleClick = () => {
-       
-        mutate(slug)
+        if(clickCount === 0 ){
+            
+            window.open('https://gappoison.com/n66f77cjb?key=084d560b78171070835b5485740f5fdf','_blank')
+        }else{
+            mutate(slug)
+        }
+        setClickCount((prev)=> prev + 1)
     }
 
 

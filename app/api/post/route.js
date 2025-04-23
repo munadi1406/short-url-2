@@ -262,6 +262,7 @@ export async function GET(req) {
     const search = searchParams.get('search') || '';
     const status = searchParams.get('status') || '';
     const lastCreatedAt = searchParams.get('lastCreatedAt') || null;  // Mendapatkan createdAt dari item terakhir yang dimuat sebelumnya
+    console.log({lastCreatedAt})
     const all = searchParams.get('all');
     if (all) {
       const allData = await Post.findAll({ attributes: ['id', 'title'], order: [['title', 'asc']] })
@@ -272,7 +273,7 @@ export async function GET(req) {
 
 
     if (lastCreatedAt) {
-      whereCondition.createdAt = {
+      whereCondition.updatedAt = {
         [Op.lt]: new Date(lastCreatedAt),
       };
     }
@@ -282,7 +283,7 @@ export async function GET(req) {
     if (status) {
       whereCondition.status = status;
     }
-    
+    console.log({whereCondition})
     // Ambil data dengan kondisi dan urutan DESC berdasarkan createdAt
     const posts = await Post.findAll({
       where: whereCondition,
@@ -314,7 +315,6 @@ export async function GET(req) {
 
         }
       ],
-
     });
 
 
@@ -328,7 +328,7 @@ export async function GET(req) {
         currentPage: page,
         pageSize: pageSize,
         totalItems: posts.length,
-        lastCreatedAt: lastLink ? lastLink.createdAt : null,
+        lastCreatedAt: lastLink ? lastLink.updatedAt : null,
       }
     }, 200)
   } catch (error) {

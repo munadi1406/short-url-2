@@ -27,7 +27,7 @@ const getUserAgentInfo = () => {
 };
 
 // Helper function to get the referrer
-const getReferer = () => document.referrer || "";
+const getReferer = () => document.referrer || "unknown";
 
 export default function LogSender() {
   const [status, setStatus] = useState("active");
@@ -39,6 +39,7 @@ export default function LogSender() {
       const ip_address = await getIpAddress();
       const { userAgent, os } = getUserAgentInfo();
       const referer = getReferer();
+   
       const fp = await load();
       const { visitorId } = await fp.get();
       return {

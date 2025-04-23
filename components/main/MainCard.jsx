@@ -14,8 +14,6 @@ export default function MainCard({ post }) {
     return (
         <Link href={`/${post.slug}`} className="hover:scale-105 transition-transform duration-300 ease-in-out">
             <div className="relative">
-
-
                 <Image
                     src={`${post.image}`}
                     alt={post.title}

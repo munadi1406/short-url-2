@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
-import { Button } from "../ui/button";
+import { Button } from "./ui/button";
 import { useEffect, useState } from "react";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
+import { Label } from "./ui/label";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { Switch } from "@/components/ui/switch"
 
@@ -19,10 +19,11 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import { Skeleton } from "../ui/skeleton";
-import { Checkbox } from "../ui/checkbox";
+import { Skeleton } from "./ui/skeleton";
+import { Checkbox } from "./ui/checkbox";
+import { SendHorizontal } from "lucide-react";
 
-export default function SendMessage({ isOpen, setIsOpen, datas }) {
+export default function SendMessage({ link, title }) {
 
     const [formData, setFormData] = useState({
         message: '',
@@ -34,7 +35,9 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
     const titleIcon = withIcon ? "🎬 " : '';
     const ratingIcon = withIcon ? "⭐ " : '';
     const genreIcon = withIcon ? "🎭 " : '';
+    const [isOpen, setIsOpen] = useState(false)
    
+
     const handleClick = async (data) => {
         const detail = await axios.get(`/api/movie/detail?id=${data.id}&type=${data.media_type}`);
         const datas = detail.data.data;
@@ -50,20 +53,19 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
             message: `${titleIcon}*Title*: ${data.name ? data.name : data?.title}\n` +
                 `${ratingIcon}*Rating*: ${data.vote_average} / ${data.vote_count} votes\n` +
                 `${genreIcon}*Genre*: ${genres}\n\n` +
-                `720p : \n480p : \n360p : ` ,
+                `720p : \n480p : \n360p : `,
             poster_path: data.poster_path,
         }));
     };
 
     useEffect(() => {
-        if (datas) {
+        if (link) {
             setFormData((prev) => ({
                 ...prev,
-                hyperlinks: `${process.env.NEXT_PUBLIC_ENDPOINT_URL}${datas.link}`,
-                poster_path: datas.poster_path
+                hyperlinks: link,
             }));
         }
-    }, [datas]);
+    }, [link]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -74,7 +76,7 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
     };
 
     const handleChannelSelection = (e) => {
-      
+
         const value = e.target.value;
         setFormData((prev) => {
             const updatedChannelIds = e.target.checked
@@ -96,7 +98,7 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
             channelIds: checked ? allChannelIds : [],
         }));
     };
-   
+
 
     const { mutate, isPending } = useMutation({
         mutationFn: async (e) => {
@@ -129,14 +131,18 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
     const movieData = useQuery({
         queryKey: [`movie`], queryFn: async () => {
             const movie = await axios.get(`/api/movie?search=${query}`)
+       
             return movie.data
         },
-        enabled: query.length > 3
+        enabled: query.length > 3 && isOpen
     })
+    const handleOpen = ()=>{
+        setIsOpen(true)
+        setQuery(title)
+    }
     let searchTimeout;
     const search = (e) => {
         const query = e.target.value;
-
         if (query.length > 3) {
             // setIsSearch(true);
             if (searchTimeout) {
@@ -152,16 +158,14 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
         }
     };
 
-    useEffect(() => {
+    
 
-        movieData.refetch()
-
-    }, [query])
 
 
 
     return (
         <>
+            <Button onClick={handleOpen} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="min-w-[80vw] max-h-[90vh] overflow-auto">
                     <DialogHeader>
@@ -217,7 +221,7 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
                                             <div key={i} className="flex gap-2 items-start">
                                                 <Checkbox
                                                     id={channel.id_chanel}
-                                                   
+
                                                     value={channel.id_chanel}
                                                     checked={formData.channelIds.includes(channel.id_chanel)} // Menggunakan 'checked' daripada 'defaultChecked'
                                                     onCheckedChange={(e) => handleChannelSelection({
@@ -238,7 +242,7 @@ export default function SendMessage({ isOpen, setIsOpen, datas }) {
                         <div className="md:order-2 order-1">
                             <div className="p-2">
                                 <Label>Search</Label>
-                                <Input type="search" placeholserd="search...." onChange={search} />
+                                <Input type="search" placeholserd="search...." onChange={search} value={title} />
 
                             </div>
                             <div className="grid grid-cols-2  max-h-[300px] overflow-auto gap-2">

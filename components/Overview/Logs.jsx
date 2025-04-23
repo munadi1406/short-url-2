@@ -159,26 +159,24 @@ export default function Logs({ footer = true }) {
                     </CardHeader>
                     <CardContent className="w-full">
                         <div className="w-full flex flex-col gap-2">
-                            <div className='flex flex-col gap-2'>
-                                <h2 className='text-lg font-semibold'>
-                                    Views / {logsVisitorsOverview?.data?.selectedFilter}
-                                </h2>
-                                <Select onValueChange={handleChangeFilter} value={filter}>
-                                    <SelectTrigger className="w-[180px]" >
-                                        <SelectValue placeholder="Pilih Filter" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {logsVisitorsOverview?.data?.availableFilters.map((e, i) => (
-                                            <SelectItem value={e.key} key={i}>{e.label}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
 
-                                <Indicator title="Total View" value={logsVisitorsOverview.data.totalVisitors} comprisonsValue={logsVisitorsOverview.data.visitorChangePercent} />
-                                <Indicator title="Prev View" value={logsVisitorsOverview.data.prevTotalVisitors} />
+                            <h2 className='text-lg font-semibold'>
+                                Views / {logsVisitorsOverview?.data?.selectedFilter}
+                            </h2>
+                            <Select onValueChange={handleChangeFilter} value={filter}>
+                                <SelectTrigger className="w-[180px]" >
+                                    <SelectValue placeholder="Pilih Filter" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {logsVisitorsOverview?.data?.availableFilters.map((e, i) => (
+                                        <SelectItem value={e.key} key={i}>{e.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
 
+                            <Indicator title="Total View" value={logsVisitorsOverview.data.totalVisitors} comprisonsValue={logsVisitorsOverview.data.visitorChangePercent} />
+                            <Indicator title="Prev View" value={logsVisitorsOverview.data.prevTotalVisitors} />
 
-                            </div>
                         </div>
                     </CardContent>
                     {footer && (
@@ -188,7 +186,7 @@ export default function Logs({ footer = true }) {
                         </CardFooter>
                     )}
                 </Card>
-                <Card className="col-span-2">
+                <Card className="md:col-span-2 col-span-1">
                     <CardHeader>
                         <CardTitle>Top Pages</CardTitle>
                         <CardDescription>

@@ -14,7 +14,16 @@ const RecoredVisitors = () => {
     const datas = await isAdmin();  // Call to check if user is an admin
     setVisitorAsAdmin(datas);  // Set the visitor's admin status
   };
-
+  const getIpAddress = async () => {
+    try {
+      const response = await fetch("https://api.ipify.org?format=json");
+      const { ip } = await response.json();
+      return ip;
+    } catch (error) {
+      console.error("Error fetching IP address:", error);
+      return "Unknown";
+    }
+  };
   // Check if visitor is an admin when component mounts
  
   useEffect(() => {
@@ -27,8 +36,9 @@ const RecoredVisitors = () => {
       try {
         if (visitorAsAdmin === undefined) return; // Wait until visitorAsAdmin is set
         if (visitorAsAdmin) return;  // Skip recording for admin
-
-        const ipAddress = window.location.hostname; // Get client-side IP
+        const ipAddress = await getIpAddress();
+       
+        // const ipAddress = window.location.hostname; // Get client-side IP
         const userAgent = navigator.userAgent; // Get user-agent from browser
         const slug = pathname.split('/').pop(); // Get slug from pathname
 

@@ -6,7 +6,7 @@ import { Tag } from '@/models/tag';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
-const getData = async (page = 1, limit = 10) => {
+const getData = async (page = 1, limit = 12) => {
   try {
     const offset = (page - 1) * limit;
     const data = await Post.findAndCountAll({
@@ -47,7 +47,7 @@ const getData = async (page = 1, limit = 10) => {
 export async function generateMetadata({ searchParams }) {
   const searchParamsResolved = await searchParams;
   const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL;
-  const page = parseInt(searchParamsResolved.page || '1', 10);
+  const page = parseInt(searchParamsResolved.page || '1', 12);
   const title = page > 1 ? `Page ${page} - Lyco` : `Lyco - Download Drama Korea Subtitle Indonesia`;
   const description = `Download Drama Korea Subtitle Indonesia`;
   const canonicalUrl = page > 1 ? `${endpoint}?page=${page}` : `${endpoint}`;
@@ -76,8 +76,8 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function Home({ searchParams }) {
   const searchParamsResolved = await searchParams;
-  const page = parseInt(searchParamsResolved.page || '1', 10);
-  const limit = 10;
+  const page = parseInt(searchParamsResolved.page || '1', 12);
+  const limit = 12;
 
   const { rows: posts, count } = await getData(page, limit);
 

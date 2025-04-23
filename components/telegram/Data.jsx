@@ -64,7 +64,7 @@ export default function Data() {
                     <TableRow>
                         <TableHead>No</TableHead>
                         <TableHead>Title</TableHead>
-                        <TableHead>Id Chanel</TableHead>
+                       
                         <TableHead>Tanggal Dibuat</TableHead>
                         <TableHead>Aksi</TableHead>
                     </TableRow>
@@ -86,7 +86,7 @@ export default function Data() {
                                         {telegram.title}
 
                                     </TableCell>
-                                    <TableCell>0</TableCell>
+                                  
                                     <TableCell>{new Date(telegram.createdAt).toLocaleString()}</TableCell>
                                     <TableCell className="flex flex-wrap gap-2 justify-center">
 

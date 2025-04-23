@@ -5,50 +5,70 @@ import axios from "axios";
 
 export async function GET() {
     try {
-        // URL untuk memanggil API getUpdates
         const response = await axios.get(`${process.env.ENDPOINT_TELEGRAM_API}${process.env.API_KEY_TELEGRAM}/getUpdates`);
-
-        // Ambil hasil data dari API
         const updates = response.data.result;
+        console.log({updates})
 
-        // Filter hanya yang memiliki 'chat' dengan type 'channel'
         const channels = updates
-            .filter(update => update.channel_post && update.channel_post.chat && update.channel_post.chat.type === 'channel')
+            .filter(update => update.channel_post && update.channel_post.chat?.type === 'channel')
             .map(update => ({
                 title: update.channel_post.chat.title,
                 id_chanel: update.channel_post.chat.id
             }));
-
-        // Hapus duplikasi berdasarkan id_chanel menggunakan Map
+        console.log({channels})
         const uniqueChannels = Array.from(
             new Map(channels.map(channel => [channel.id_chanel, channel])).values()
         );
 
-        // Ambil id_chanel yang sudah ada di database
-        const existingChannels = await Telegram.findAll({ attributes: ['id_chanel'] });
-        const existingIds = new Set(existingChannels.map(channel => Number(channel.id_chanel))); // Konversi ke number
-        
+        // Fetch all existing channels from DB
+        const existingChannels = await Telegram.findAll({ attributes: ['id_chanel', 'title'] });
+        const existingMap = new Map(existingChannels.map(c => [Number(c.id_chanel), c.title]));
 
-        // Filter channel baru yang belum ada di database
-        const newChannels = uniqueChannels.filter(channel => !existingIds.has(Number(channel.id_chanel)));
+        const newChannels = [];
+        const channelsToUpdate = [];
 
-        // Bulk insert hanya channel baru
+        uniqueChannels.forEach(channel => {
+            const existingTitle = existingMap.get(Number(channel.id_chanel));
+
+            if (existingTitle === undefined) {
+                // New channel
+                newChannels.push(channel);
+            } else if (existingTitle !== channel.title) {
+                // Title changed → update needed
+                channelsToUpdate.push(channel);
+            }
+        });
+
+        // Insert new
         if (newChannels.length > 0) {
             await Telegram.bulkCreate(newChannels, {
                 ignoreDuplicates: true
             });
         }
 
-        // Membuat response dengan jumlah dan detail channel baru
-        const newChannelInfo = newChannels.map(channel => `Title: ${channel.title}`).join("\n");
-        const message = newChannels.length > 0
-            ? `Sinkronisasi berhasil, ${newChannels.length} channel baru ditambahkan:\n${newChannelInfo}`
-            : "Sinkronisasi berhasil, tidak ada channel baru.";
+        // Update existing title if changed
+        for (const channel of channelsToUpdate) {
+            await Telegram.update(
+                { title: channel.title },
+                { where: { id_chanel: channel.id_chanel } }
+            );
+        }
 
-        return jsonResponse({ msg: message }, 200);
+        // Build response message
+        const newChannelInfo = newChannels.map(c => `+ ${c.title}`).join("\n");
+        const updatedChannelInfo = channelsToUpdate.map(c => `~ ${c.title}`).join("\n");
+
+        const message = 
+            `${newChannels.length > 0 ? `✅ ${newChannels.length} channel baru:\n${newChannelInfo}\n` : ''}` +
+            `${channelsToUpdate.length > 0 ? `✏️ ${channelsToUpdate.length} channel diupdate:\n${updatedChannelInfo}` : ''}` ||
+            "Tidak ada perubahan.";
+
+        return jsonResponse({ msg: `Sinkronisasi selesai.\n\n${message}` }, 200);
+
     } catch (error) {
         console.error("Error during synchronization:", error);
         return jsonResponse({ msg: "Sinkronisasi gagal" }, 500);
     }
 }
+
 

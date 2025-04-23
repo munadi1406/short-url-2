@@ -65,10 +65,10 @@ export async function generateMetadata({ params }) {
 export default async function Page({ params, searchParams }) {
     const param = await params;
     const genre = decodeURIComponent(param.genre)
-    const limit = 10; // Menentukan batasan data per halaman
+    const limit = 12; // Menentukan batasan data per halaman
 
     const searchParamsResolved = await searchParams; // Awaiting searchParams
-    const page = parseInt(searchParamsResolved.page || '1', 10); // Getting the page number or default to 1
+    const page = parseInt(searchParamsResolved.page || '1', 12); // Getting the page number or default to 1
 
     // Ambil data berdasarkan genre
     const genreData = await getData(genre);

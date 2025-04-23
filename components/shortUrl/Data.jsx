@@ -20,13 +20,13 @@ import DeleteLink from "./DeleteLink";
 import Link from "next/link";
 import { Eye, SendHorizontal, Wrench } from "lucide-react";
 import ByCategory from './ByCategory'
-import SendMessage from "./SendMessage";
+
 import FormCreate from "./FormCreate";
 import CopyButton from "../CopyButton";
 
 
 export default function Data() {
-    const [openMessage, setOpenMessage] = useState(false);
+ 
     const {
         data,
         fetchNextPage,
@@ -79,7 +79,7 @@ export default function Data() {
 
     return (
         <div className="space-y-4">
-            <SendMessage isOpen={openMessage} setIsOpen={setOpenMessage} datas={currentData} />
+           
             <div className="px-2 py-4 shadow-md rounded-md border border-gray-300">
                 <FormCreate refetch={customRefetch.refetch}/>
                 <ByCategory handleClickSendMessage={handleClickSendMessage} handleRefetch={handleRefetch}/>
@@ -125,7 +125,6 @@ export default function Data() {
 
                                             <Button onClick={() => handleEdit(link)} ><Wrench /></Button>
                                             <Link href={`/l/${link.short_url}`} target="_blank" className={buttonVariants()}><Eye /></Link>
-                                            <Button onClick={() => handleClickSendMessage({ title: link.title, link: `l/${link.short_url}` })} className="bg-green-600 hover:bg-green-300"><SendHorizontal /></Button>
                                             <CopyButton textToCopy={`${process.env.NEXT_PUBLIC_ENDPOINT_URL}l/${link.short_url}`}/>
                                             <DeleteLink data={link} refetch={refetch} />
                                         </TableCell>

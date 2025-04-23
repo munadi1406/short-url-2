@@ -17,7 +17,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import { Button, buttonVariants } from "../ui/button";
 // import EditGenre from "./EditGenre";
 // import DeleteGenre from "./DeleteGenre";
-import { Link2, Settings, SquarePlus, Wrench } from "lucide-react";
+import { Link2, SendHorizontal, Settings, SquarePlus, Wrench } from "lucide-react";
 import { Badge } from "../ui/badge";
 import Link from "next/link";
 import { Switch } from "../ui/switch";
@@ -37,6 +37,7 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import BadgeRandomColor from "@/lib/BadgeRandomColor";
+import SendMessage from "../SendMessage";
 
 export default function Data() {
     const [query, setQuery] = useState("")
@@ -92,11 +93,12 @@ export default function Data() {
     let searchTimeout;
     const search = (e) => {
         const query = e.target.value;
-
-        // Clear URL if query is empty
+        
+       
         if (!query) {
+            
             router.push(window.location.pathname);
-            return;
+            
         }
 
         // Debounce search to optimize performance
@@ -232,6 +234,8 @@ export default function Data() {
                                     <TableCell className="flex flex-wrap gap-2 justify-start">
                                         <Link href={`/dashboard/post/link/${post.id}`} className={buttonVariants({ className: "bg-yellow-500 text-white" })}><SquarePlus /></Link>
                                         <Button title="Edit Post" onClick={() => handleEdit(post, 'post')} ><Wrench /></Button>
+                                        <SendMessage link={`${process.env.NEXT_PUBLIC_ENDPOINT_URL}${post.slug}`} title={post.title}/>
+                                       
                                         <Button title="Edit Link" onClick={() => handleEdit(post, 'link')} className={buttonVariants({ className: "bg-slate-600 text-white" })}><Settings /></Button>
                                         <Button title="Copy Link" onClick={() => handleCopy(`${process.env.NEXT_PUBLIC_ENDPOINT_URL}${post.slug}`)} className={buttonVariants({ className: "bg-indigo-600 text-white" })}> <Link2 /></Button>
                                         <DeletePost data={post} refetch={refetch} />
