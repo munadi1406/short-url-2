@@ -246,7 +246,7 @@ export default function SendMessage({ link, title }) {
 
                             </div>
                             <div className="grid grid-cols-2  max-h-[300px] overflow-auto gap-2">
-                                {console.log(movieData.data)}
+                            
                                 {movieData.isLoading && (
                                     <>
                                         <Skeleton className="h-44 w-full rounded-none" />
