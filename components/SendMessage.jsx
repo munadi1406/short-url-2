@@ -242,10 +242,11 @@ export default function SendMessage({ link, title }) {
                         <div className="md:order-2 order-1">
                             <div className="p-2">
                                 <Label>Search</Label>
-                                <Input type="search" placeholserd="search...." onChange={search} value={title} />
+                                <Input type="search" placeholserd="search...." onChange={search} defaultValue={title} />
 
                             </div>
                             <div className="grid grid-cols-2  max-h-[300px] overflow-auto gap-2">
+                                {console.log(movieData.data)}
                                 {movieData.isLoading && (
                                     <>
                                         <Skeleton className="h-44 w-full rounded-none" />
@@ -254,7 +255,7 @@ export default function SendMessage({ link, title }) {
                                         <Skeleton className="h-44 w-full rounded-none" />
                                     </>
                                 )}
-                                {movieData?.data?.data?.results?.map((e, i) => (
+                                {movieData?.data?.data?.map((e, i) => (
                                     <div key={i} onClick={() => handleClick(e)} className="relative cursor-pointer "> {/* Pastikan tinggi dan lebar ditentukan */}
                                         {e.poster_path ? (
                                             <>

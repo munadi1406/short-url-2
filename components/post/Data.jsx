@@ -269,7 +269,7 @@ export default function Data() {
                 </TableBody>
             </Table>
 
-            {/* Tombol untuk memuat lebih banyak data */}
+
             {hasNextPage && (
                 <Button
                     onClick={fetchNextPage}

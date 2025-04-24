@@ -1,13 +1,22 @@
+
+
 import { jsonResponse } from "@/lib/jsonResponse";
 import { Telegram } from "@/models/telegram";
-import axios from "axios";
+
 
 
 export async function GET() {
     try {
-        const response = await axios.get(`${process.env.ENDPOINT_TELEGRAM_API}${process.env.API_KEY_TELEGRAM}/getUpdates`);
-        const updates = response.data.result;
-        console.log({updates})
+        const response = await fetch(`${process.env.ENDPOINT_TELEGRAM_API}${process.env.API_KEY_TELEGRAM}/getUpdates`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch updates from Telegram API');
+        }
+        
+        const data = await response.json();
+        const updates = data.result;
+        
+     
 
         const channels = updates
             .filter(update => update.channel_post && update.channel_post.chat?.type === 'channel')

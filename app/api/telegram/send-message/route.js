@@ -1,5 +1,7 @@
+
+
 import TelegramBot from "node-telegram-bot-api";
-import axios from "axios";
+
 import fs from "fs";
 import path from "path";
 
@@ -36,11 +38,18 @@ export async function POST(req) {
             } else {
                 // Jika file belum ada, unduh dan simpan ke lokal
                 try {
-                    const imageResponse = await axios.get(`${process.env.ENDPOINT_TMBD_IMAGE}/original${poster_path}`, {
-                        responseType: "arraybuffer",
-                    });
-                    photoBuffer = Buffer.from(imageResponse.data);
-                    fs.writeFileSync(localImagePath, photoBuffer); // Simpan ke lokal
+                    const imageResponse = await fetch(`${process.env.ENDPOINT_TMBD_IMAGE}/original${poster_path}`);
+
+                    if (!imageResponse.ok) {
+                      throw new Error('Failed to fetch image');
+                    }
+                    
+                    // Mengambil data gambar sebagai ArrayBuffer
+                    const buffer = await imageResponse.arrayBuffer();
+                    
+                    // Menyimpan buffer gambar ke file lokal
+                    const photoBuffer = Buffer.from(buffer);
+                    fs.writeFileSync(localImagePath, photoBuffer);
                 } catch (error) {
                     console.error("Error downloading image:", error.message);
                     return new Response(JSON.stringify({ msg: "Gagal mengunduh gambar", error: error.message }), {

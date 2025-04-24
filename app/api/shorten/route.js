@@ -1,5 +1,6 @@
+
+
 import { NextResponse } from 'next/server';
-import axios from 'axios';
 import { load } from 'cheerio';
 import { sequelize } from '@/lib/sequelize'; // Pastikan jalur ini benar
 import { Url } from '@/models/urls';
@@ -14,14 +15,28 @@ import { jsonResponse } from '@/lib/jsonResponse';
 // Fungsi untuk mengambil title dari metadata link
 async function getTitleFromUrl(url,title) {
     try {
-        const response = await axios.get(url, { timeout: 10000 });
-        const $ = load(response.data);
-        const title = $('title').text().trim() || title;
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000); // ⏱️ timeout 10 detik
+    
+        const response = await fetch(url, {
+          signal: controller.signal,
+        });
+    
+        clearTimeout(timeout);
+    
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+    
+        const html = await response.text();
+        const $ = load(html);
+        const title = $('title').text().trim() || fallbackTitle;
+    
         return title;
-    } catch (error) {
+      } catch (error) {
         console.error(`Error fetching title for ${url}:`, error.message);
         return title;
-    }
+      }
 }
 
 export async function POST(req) {

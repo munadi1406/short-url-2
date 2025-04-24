@@ -1,4 +1,4 @@
-import axios from 'axios';
+
 
 export async function GET(request) {
   // Mengambil parameter query 'ipAddress' dari URL
@@ -10,11 +10,18 @@ export async function GET(request) {
   }
 
   try {
-    // Panggil API eksternal via HTTP menggunakan Axios
-    const response = await axios.get(`http://ip-api.com/json/${ipAddress}`);
+   
+    const response = await fetch(`http://ip-api.com/json/${ipAddress}`, {
+      cache: 'no-store', // Supaya tidak menggunakan cache (real-time IP data)
+    });
 
-    // Mengirim data ke klien
-    return new Response(JSON.stringify(response.data), {
+    if (!response.ok) {
+      throw new Error('Failed to fetch IP data');
+    }
+
+    const data = await response.json();
+
+    return new Response(JSON.stringify(data), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

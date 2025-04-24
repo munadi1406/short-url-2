@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    serverExternalPackages: ['sequelize'],
+    serverExternalPackages: ['sequelize','axios'],
     images: {
         remotePatterns: [
           {

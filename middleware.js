@@ -1,7 +1,9 @@
+
+
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { decrypt } from '@/lib/session';
-import axios from 'axios';
+
 
 // Rute yang dilindungi (hanya bisa diakses jika login)
 const protectedRoutes = ['/dashboard'];
@@ -15,8 +17,13 @@ export default async function middleware(req) {
   try {
     // 1. Mengecek status maintenance, kecuali di /login atau /dashboard
     if (!path.startsWith('/dashboard') && path !== '/login' && path !== '/maintenance') {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/maintenance/status/check`);
-      const { isActive } = res.data;
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/maintenance/status/check`, {
+        cache: 'no-store',
+      });
+
+      if (!res.ok) throw new Error('Failed to fetch maintenance status');
+
+      const { isActive } = await res.json();
 
       // Redirect ke /maintenance jika maintenance aktif
       if (isActive) {
