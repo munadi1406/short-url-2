@@ -15,21 +15,7 @@ export default async function middleware(req) {
   const path = req.nextUrl.pathname;
 
   try {
-    // 1. Mengecek status maintenance, kecuali di /login atau /dashboard
-    if (!path.startsWith('/dashboard') && path !== '/login' && path !== '/maintenance') {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/maintenance/status/check`, {
-        cache: 'no-store',
-      });
-
-      if (!res.ok) throw new Error('Failed to fetch maintenance status');
-
-      const { isActive } = await res.json();
-
-      // Redirect ke /maintenance jika maintenance aktif
-      if (isActive) {
-        return NextResponse.redirect(new URL('/maintenance', req.url));
-      }
-    }
+    
 
     // 2. Cek apakah rute dilindungi atau publik
     const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route));

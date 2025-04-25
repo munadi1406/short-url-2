@@ -8,8 +8,11 @@ import {
   EditorContent,
   EditorCommandList,
   EditorBubble,
+  ImageResizer,
+  handleCommandNavigation,
+  handleImageDrop,
+  handleImagePaste
 } from "novel";
-import { ImageResizer, handleCommandNavigation } from "novel/extensions";
 import { defaultExtensions } from "./extensions";
 import { NodeSelector } from "./selectors/node-selector";
 import { LinkSelector } from "./selectors/link-selector";
@@ -17,7 +20,6 @@ import { ColorSelector } from "./selectors/color-selector";
 
 import { TextButtons } from "./selectors/text-buttons";
 import { slashCommand, suggestionItems } from "./slash-command";
-import { handleImageDrop, handleImagePaste } from "novel/plugins";
 import { uploadFn } from "./image-upload";
 import { Separator } from "@/components/ui/separator";
 import { detectImageDeletion } from "@/lib/converUrl";
@@ -31,8 +33,8 @@ const Editor = ({ initialValue, onChange }) => {
   const [openColor, setOpenColor] = useState(false);
   const [openLink, setOpenLink] = useState(false);
 
-  const convert = async (html)=>{
-  
+  const convert = async (html) => {
+
     const datas = await HTMLToJSON(`<div>${html}</div>`, false)
     onChange(datas)
   }
@@ -52,7 +54,7 @@ const Editor = ({ initialValue, onChange }) => {
           handlePaste: (view, event) => handleImagePaste(view, event, uploadFn),
           handleDrop: (view, event, _slice, moved) =>
             handleImageDrop(view, event, moved, uploadFn),
-        
+
           attributes: {
             class: `prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full`,
           },
@@ -60,7 +62,7 @@ const Editor = ({ initialValue, onChange }) => {
         onUpdate={({ editor }) => {
           detectImageDeletion(editor.getJSON());
           convert(editor.getHTML())
-        }} 
+        }}
         slotAfter={<ImageResizer />}
       >
         <EditorCommand className="z-50 h-auto max-h-[330px] overflow-y-auto rounded-md border border-muted bg-background px-1 py-2 shadow-md transition-all">
