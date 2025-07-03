@@ -26,8 +26,10 @@ export default function AutoFill({handleAutoFill}) {
     const handleClick = async (data) => {
         const detail = await axios.get(`/api/movie/detail?id=${data.id}&type=${data.media_type}`);
         const datas = detail.data.data;
+        
     
         handleAutoFill(datas)
+        setOpen(false)
     };
 
     const movieData = useQuery({
@@ -88,7 +90,7 @@ export default function AutoFill({handleAutoFill}) {
                                    <Skeleton className="h-44 w-full rounded-none" />
                                </>
                            )}
-                           {movieData?.data?.data?.results?.map((e, i) => (
+                           {movieData?.data?.data?.map((e, i) => (
                                <div 
                                    key={i} 
                                    onClick={() => handleClick(e)} 
