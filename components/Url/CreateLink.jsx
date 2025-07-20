@@ -94,8 +94,8 @@ export default function CreateLink() {
 
     const handleClick = () => {
         if(clickCount === 0 ){
-            
-            window.open('https://gappoison.com/n66f77cjb?key=084d560b78171070835b5485740f5fdf','_blank')
+          
+            window.open('https://allocationcaller.com/n66f77cjb?key=084d560b78171070835b5485740f5fdf','_blank')
         }else{
             mutate(slug)
         }
