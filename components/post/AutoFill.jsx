@@ -27,15 +27,18 @@ export default function AutoFill({handleAutoFill}) {
         const detail = await axios.get(`/api/movie/detail?id=${data.id}&type=${data.media_type}`);
         const datas = detail.data.data;
         
-    
+      
         handleAutoFill(datas)
         setOpen(false)
     };
+  
 
     const movieData = useQuery({
         queryKey: [`movie`, debouncedQuery.current], 
         queryFn: async () => {
             const movie = await axios.get(`/api/movie?search=${debouncedQuery.current}`);
+           
+           
             return movie.data;
         },
         enabled: debouncedQuery.current.length > 3, 
@@ -52,6 +55,7 @@ export default function AutoFill({handleAutoFill}) {
 
         debounceTimeout.current = setTimeout(() => {
             debouncedQuery.current = newQuery; // Update debounced query
+          
             setQuery(newQuery); // Trigger query update
         }, 300); // Adjust debounce delay as needed
     };

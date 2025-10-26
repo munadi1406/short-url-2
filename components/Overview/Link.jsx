@@ -21,6 +21,7 @@ export default function Link() {
         staleTime: 10000,
         refetchInterval: 5000,
     })
+    
     if (isLoading) {
         return <LinkSkeleton/>
     }

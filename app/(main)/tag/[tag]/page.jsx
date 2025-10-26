@@ -10,7 +10,8 @@ const getData = async (tag) => {
   const data = await Tag.findOne({
     where: {
       name: tag,
-    },
+      status: 'publish',
+  },
     include: [
       {
         model: Post,
@@ -42,7 +43,7 @@ export async function generateMetadata({ params }) {
   const param = await params
   const tag = decodeURIComponent(param.tag);
   const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL;
-  const title = `Drama Korea ${tag} - Lyco `;
+  const title = `Drama Korea ${tag}  `;
   const description = `${tag} - Lyco - Download Drama Korea Subtitle Indonesia `;
   const canonicalUrl = `${endpoint}tag/${tag}`;
   return {
@@ -73,7 +74,7 @@ export default async function TagPage({ params, searchParams }) {
   const tag = decodeURIComponent(param.tag);
   const limit = 12;
   const searchParamsResolved = await searchParams || {};
-  const page = parseInt(searchParamsResolved.page || '1', 12);
+  const page = parseInt(searchParamsResolved.page || 1);
 
   const data = await getData(tag);
 

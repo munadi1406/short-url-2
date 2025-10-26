@@ -15,10 +15,12 @@ import PostView from '@/models/postView';
 const GradientCard = dynamic(() => import('@/components/main/GradientColorImage'), {
     loading: () => <SkeletonLoading />, // Skeleton loading sebagai fallback
 });
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 const getDetail = async (slug) => {
     const data = await Post.findOne({
         where: {
-            slug
+            slug,
+            status: 'publish',
         },
         include: [
             {
@@ -102,7 +104,7 @@ const getRelatedPosts = async (genres, excludePostId) => {
                 through: { attributes: [] },
             },
         ],
-        limit: 5,
+        limit: 6,
     });
 
     // If no related posts found, fetch random posts
@@ -190,7 +192,7 @@ export default async function page({ params }) {
                 </div>
                 <div className="w-full space-y-4 mt-4">
                     <h3 className="text-lg font-semibold">Related Posts</h3>
-                    <div className="space-y-4">
+                    <div className="w-full gap-2 grid grid-cols-3 md:grid-cols-6">
                         {relatedPosts.length > 0 ? (
                             relatedPosts.map((post) => (
                                 <Link
@@ -198,27 +200,23 @@ export default async function page({ params }) {
                                     href={`/${post.slug}`}
                                     className="block bg-gray-100 hover:bg-gray-200 p-3 rounded-md shadow"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-16 h-16 relative">
+                                    <div className="flex flex-col items-center gap-2">
+                                        <AspectRatio ratio={1 / 1} className="rounded-lg">
                                             <Image
                                                 src={post.image}
                                                 alt={post.title}
                                                 fill
-                                                style={{ objectFit: 'cover' }}
+                                                className='object-cover h-full w-full'
                                                 quality={70}
                                                 loading='lazy'
-                                                className="rounded-md"
-                                                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"  // Menyesuaikan dengan lebar viewport
+                                                sizes="(max-width: 768px) 100vw, 60vw"
                                             />
-
-                                        </div>
-                                        <div>
-                                            <h4 className="text-sm font-semibold">
+                                        </AspectRatio>
+                                        <div className='w-full'>
+                                            <h4 className="text-xs font-semibold text-gray-600 text-left">
                                                 {post.title}
                                             </h4>
-                                            <p className="text-xs text-gray-600">
-                                                {post.genres.map((g) => g.name).join(', ')}
-                                            </p>
+
                                         </div>
                                     </div>
                                 </Link>

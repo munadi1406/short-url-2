@@ -7,10 +7,14 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
 import PostSkeleton from './PostSkeleton'
+import Link from 'next/link'
+import { buttonVariants } from '../ui/button'
+
 export default function Post() {
     const { data, isLoading } = useQuery({
         queryKey: ['postStat'], queryFn: async () => {
@@ -64,6 +68,9 @@ export default function Post() {
                     </div>
                 </div>
             </CardContent>
+            <CardFooter>
+                <Link  href="dashboard/top-post-detail" className={buttonVariants()}>Detail</Link>
+            </CardFooter>
         </Card>
     )
 }

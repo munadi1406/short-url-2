@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import React from 'react'
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 
 export default function MainCard({ post }) {
     const badgeColors = [
@@ -14,17 +15,18 @@ export default function MainCard({ post }) {
     return (
         <Link href={`/${post.slug}`} className="hover:scale-105 transition-transform duration-300 ease-in-out">
             <div className="relative">
-                <Image
-                    src={`${post.image}`}
-                    alt={post.title}
-                    width="0"
-                    height="0"
-                    sizes="100vw"
-                    className="w-full h-auto rounded md"
-                    itemProp="image"
-                    quality={70}
-                    loading='lazy'
-                />
+                <AspectRatio ratio={3 / 4}>
+                    <Image
+                        src={`${post.image}`}
+                        alt={post.title}
+                        fill
+                        className="w-full h-full rounded md"
+                        itemProp="image"
+                        quality={70}
+                        loading='lazy'
+                        sizes="(max-width: 768px) 100vw, 60vw"
+                    />
+                </AspectRatio>
                 <div className="flex flex-wrap gap-2 w-full p-2 absolute bottom-0">
                     {post.genres.slice(0, 3).map((genre, subIndex) => (
                         <div key={subIndex}>

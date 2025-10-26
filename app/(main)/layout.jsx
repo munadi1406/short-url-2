@@ -14,6 +14,10 @@ const nunito = Nunito_Sans({
     weight: ['400', '500', '600', '700']
 })
 export const metadata = {
+    title: {
+        template: '%s | Lyco',
+        default: 'Lyco', 
+    },
     robots: {
         index: true,
         follow: true,
@@ -24,19 +28,19 @@ export const metadata = {
 export default async function layout({ children }) {
     let isActive = false;
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/maintenance/status/check`, {
-        cache: 'no-store',
-      });
-      if (res.ok) {
-        const data = await res.json();
-        isActive = data.isActive;
-      } else {
-        
-      }
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_ENDPOINT}/api/maintenance/status/check`, {
+            cache: 'no-store',
+        });
+        if (res.ok) {
+            const data = await res.json();
+            isActive = data.isActive;
+        } else {
+
+        }
     } catch (err) {
-      
+
     }
-    
+
 
 
 
@@ -47,12 +51,9 @@ export default async function layout({ children }) {
                     <>
                         <RecoredVisitors />
                         <Navbar />
-                        <div className={`flex md:flex-row md:mb-0  flex-col relative  w-full min-h-screen p-4 ${nunito.className}`}>
-                            <div className='md:w-4/6 w-full'>
+                        <div className={`md:mb-0  relative  w-full min-h-screen p-4 ${nunito.className}`}>
+                            <div className='w-full'>
                                 {children}
-                            </div>
-                            <div className='md:w-2/6 w-full py-4 md:px-6 px-2 top-0 h-max'>
-                                <Popular />
                             </div>
                         </div>
                         <footer className="bg-gray-800 text-white py-6 mt-8 mb-24 md:mb-0">

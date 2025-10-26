@@ -1,6 +1,7 @@
 import { jsonResponse } from "@/lib/jsonResponse";
 import { Genre } from "@/models/genre";
 import { Telegram } from "@/models/telegram";
+import { Op } from "sequelize";
 
 // Menangani berbagai metode HTTP untuk CRUD
 export async function GET(req) {
@@ -48,7 +49,7 @@ export async function GET(req) {
             }
         }, 200)
     } catch (error) {
-
+        console.log(error)
         return jsonResponse({
             statusCode: 500,
             msg: "Failed to fetch data",
@@ -61,9 +62,11 @@ export async function POST(req) {
         const { name } = await req.json();
 
         if (!name) {
-
             return jsonResponse({ success: false, msg: "nama genre masih kosong" }, 400)
         }
+        const search  = await Genre.findAll({where:{name}})
+        console.log(search.length)
+        if(search.length >= 1) return jsonResponse({success:false,msg:"Genre Sudah ada"},400)
 
         await Genre.create({
             name
@@ -72,7 +75,7 @@ export async function POST(req) {
 
         return jsonResponse({ msg: "Data Berhasil Disimpan" }, 200)
     } catch (error) {
-
+        console.log(error)
         return jsonResponse({ msg: "Internal Server Error" }, 500);
     }
 }

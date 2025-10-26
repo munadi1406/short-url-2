@@ -4,8 +4,8 @@ import Post from "@/models/post";
 import { sequelize } from "@/lib/sequelize";
 import { Op } from "sequelize";
 
-// Fungsi untuk mendapatkan top 5 post berdasarkan jumlah tampilan hari ini
-async function getTop5PostsByViewsToday() {
+// Fungsi untuk mendapatkan top posts berdasarkan jumlah tampilan hari ini
+async function getTopPostsByViewsToday(limit = 5) {
   const today = new Date();
   const startOfDay = new Date(today.setHours(0, 0, 0, 0)); // Awal hari
   const endOfDay = new Date(today.setHours(23, 59, 59, 999)); // Akhir hari
@@ -13,68 +13,75 @@ async function getTop5PostsByViewsToday() {
   return await PostView.findAll({
     attributes: [
       'post_id',
-      [sequelize.fn('COUNT', sequelize.col('post_id')), 'viewCount'], // Hitung jumlah tampilan berdasarkan post_id
+      [sequelize.fn('COUNT', sequelize.col('post_id')), 'viewCount'],
     ],
     where: {
       viewed_at: {
-        [Op.between]: [startOfDay, endOfDay], // Filter berdasarkan waktu
+        [Op.between]: [startOfDay, endOfDay],
       },
     },
     include: [
       {
         model: Post,
-        as: 'post', // Alias untuk relasi
-        attributes: ['id', 'title', 'slug'], // Ambil detail post
+        as: 'post',
+        attributes: ['id', 'title', 'slug'],
       },
     ],
-    group: ['post_id', 'post.id'], // Kelompokkan berdasarkan post_id
-    order: [[sequelize.literal('viewCount'), 'DESC']], // Urutkan berdasarkan jumlah tampilan
-    limit: 5, // Ambil 5 post teratas
+    group: ['post_id', 'post.id'],
+    order: [[sequelize.literal('viewCount'), 'DESC']],
+    limit,
   });
 }
 
-// Fungsi untuk mendapatkan top 5 post berdasarkan jumlah tampilan secara keseluruhan
-async function getTop5PostsByViewsAllTime() {
+// Fungsi untuk mendapatkan top posts berdasarkan jumlah tampilan secara keseluruhan
+async function getTopPostsByViewsAllTime(limit = 5) {
   return await PostView.findAll({
     attributes: [
       'post_id',
-      [sequelize.fn('COUNT', sequelize.col('post_id')), 'viewCount'], // Hitung jumlah tampilan berdasarkan post_id
+      [sequelize.fn('COUNT', sequelize.col('post_id')), 'viewCount'],
     ],
     include: [
       {
         model: Post,
-        as: 'post', // Alias untuk relasi
-        attributes: ['id', 'title', 'slug'], // Ambil detail post
+        as: 'post',
+        attributes: ['id', 'title', 'slug'],
       },
     ],
-    group: ['post_id', 'post.id'], // Kelompokkan berdasarkan post_id
-    order: [[sequelize.literal('viewCount'), 'DESC']], // Urutkan berdasarkan jumlah tampilan
-    limit: 5, // Ambil 5 post teratas
+    group: ['post_id', 'post.id'],
+    order: [[sequelize.literal('viewCount'), 'DESC']],
+    limit,
   });
 }
 
-// Endpoint GET untuk menampilkan top 5 post berdasarkan view (hari ini dan secara umum)
-export async function GET() {
+// Endpoint GET untuk menampilkan top posts dengan limit dinamis
+export async function GET(req) {
   try {
-    // Mendapatkan 5 post dengan view terbanyak hari ini
-    const topPostsToday = await getTop5PostsByViewsToday();
+    const { searchParams } = new URL(req.url);
+    const limitParam = parseInt(searchParams.get('limit'), 10);
 
-    // Mendapatkan 5 post dengan view terbanyak secara keseluruhan
-    const topPostsAllTime = await getTop5PostsByViewsAllTime();
+    // Gunakan default 5, batasi maksimum 100 agar aman
+    const limit = !isNaN(limitParam) && limitParam > 0
+      ? Math.min(limitParam, 100)
+      : 5;
 
-    // Format hasil menjadi array yang lebih rapi
+    // Dapatkan data
+    const [topPostsToday, topPostsAllTime] = await Promise.all([
+      getTopPostsByViewsToday(limit),
+      getTopPostsByViewsAllTime(limit),
+    ]);
+
+    // Format hasil
     const formatPosts = (posts) =>
       posts.map((item) => ({
-        postId: item.post.id, // ID post dari relasi
-        title: item.post.title, // Judul post dari relasi
-        slug: item.post.slug, // Slug post dari relasi
-        viewCount: item.dataValues.viewCount, // Jumlah tampilan
+        postId: item.post.id,
+        title: item.post.title,
+        slug: item.post.slug,
+        viewCount: Number(item.dataValues.viewCount),
       }));
 
-    // Return response dalam format JSON menggunakan NextResponse
     return NextResponse.json({
       statusCode: 200,
-      msg: 'Top 5 Posts Today and All Time',
+      msg: `Top ${limit} Posts (Today & All Time)`,
       data: {
         today: formatPosts(topPostsToday),
         allTime: formatPosts(topPostsAllTime),

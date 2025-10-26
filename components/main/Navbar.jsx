@@ -10,6 +10,7 @@ import { ChartBarStacked, House, Timer, Vote } from 'lucide-react'
 import { Ubuntu, Nunito_Sans } from 'next/font/google'
 import { Genre } from '@/models/genre'
 import Search from './Search'
+import { Search as SearchIcon } from "lucide-react";
 const oswald = Ubuntu({
     weight: ['400', '500', '700'],
     subsets: ['cyrillic'],
@@ -64,7 +65,7 @@ export default async function Navbar() {
                 <DropdownMenu>
                     <DropdownMenuTrigger>Genre</DropdownMenuTrigger>
                     <DropdownMenuContent className="max-h-[70vh] overflow-auto">
-                        
+
                         {genres.map((e, i) => (
                             <Link key={i} href={`/genre/${e.name}`}>
                                 <DropdownMenuItem key={i}>{e.name}</DropdownMenuItem>
@@ -72,7 +73,12 @@ export default async function Navbar() {
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
-                <Search placeholder={"Search..."}/>
+                <Link href="/search">
+                    <SearchIcon />
+                </Link>
+
+                {/* versi awal dibawah */}
+                {/* <Search placeholder={"Search..."} /> */}
             </div>
             {/* mobile */}
             <div className='md:hidden left-0 bottom-0 z-40 py-4 bg-white w-full fixed'>

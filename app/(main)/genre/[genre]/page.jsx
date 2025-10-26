@@ -10,6 +10,7 @@ const getData = async (genre) => {
     const data = await Genre.findOne({
         where: {
             name: genre,
+            status: 'publish',
         },
         include: [
             {
@@ -58,7 +59,7 @@ export async function generateMetadata({ params }) {
         },
         alternates: {
             canonical: canonicalUrl, // Menambahkan canonical di sini
-          },
+        },
     };
 }
 
@@ -68,9 +69,9 @@ export default async function Page({ params, searchParams }) {
     const limit = 12; // Menentukan batasan data per halaman
 
     const searchParamsResolved = await searchParams; // Awaiting searchParams
-    const page = parseInt(searchParamsResolved.page || '1', 12); // Getting the page number or default to 1
+    const page = parseInt(searchParamsResolved.page || 1); // Getting the page number or default to 1
 
-    // Ambil data berdasarkan genre
+
     const genreData = await getData(genre);
 
     if (!genreData || genreData.posts.length === 0) {
@@ -112,7 +113,7 @@ export default async function Page({ params, searchParams }) {
                 <div className="flex items-center justify-center mt-6 space-x-2">
                     {page > 1 && (
                         <Link
-                            href={`/?page=${page - 1}`}
+                            href={`${genre}/?page=${page - 1}`}
                             className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
                         >
                             <ChevronLeft />
@@ -124,7 +125,7 @@ export default async function Page({ params, searchParams }) {
                         return (
                             <Link
                                 key={pageNumber}
-                                href={`/?page=${pageNumber}`}
+                                href={`${genre}/?page=${pageNumber}`}
                                 className={`px-4 py-2 rounded-md ${pageNumber === page
                                     ? 'bg-blue-500 text-white'
                                     : 'bg-gray-200 hover:bg-gray-300'
@@ -137,10 +138,10 @@ export default async function Page({ params, searchParams }) {
 
                     {page < totalPages && (
                         <Link
-                            href={`/?page=${page + 1}`}
+                            href={`${genre}/?page=${page + 1}`}
                             className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
                         >
-                             <ChevronRight />
+                            <ChevronRight />
                         </Link>
                     )}
                 </div>

@@ -1,4 +1,5 @@
 import MainCard from '@/components/main/MainCard';
+import Popular from '@/components/main/Popular';
 // import LogSend from '@/lib/LogSend';
 import { Genre } from '@/models/genre';
 import Post from '@/models/post';
@@ -9,7 +10,8 @@ import Link from 'next/link';
 const getData = async (page = 1, limit = 12) => {
   try {
     const offset = (page - 1) * limit;
-    const data = await Post.findAndCountAll({
+
+    const result = await Post.findAndCountAll({
       attributes: ['id', 'title', 'description', 'updatedAt', 'image', 'slug'],
       where: {
         status: 'publish',
@@ -37,7 +39,8 @@ const getData = async (page = 1, limit = 12) => {
         },
       ],
     });
-    return data;
+
+    return { data: result.rows, count: result.count };
   } catch (error) {
 
     return { rows: [], count: 0 };
@@ -47,8 +50,8 @@ const getData = async (page = 1, limit = 12) => {
 export async function generateMetadata({ searchParams }) {
   const searchParamsResolved = await searchParams;
   const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL;
-  const page = parseInt(searchParamsResolved.page || '1', 12);
-  const title = page > 1 ? `Page ${page} - Lyco` : `Lyco - Download Drama Korea Subtitle Indonesia`;
+  const page = parseInt(searchParamsResolved.page || 1);
+  const title = page > 1 ? `Page ${page} | Lyco` : `Download Drama Korea Subtitle Indonesia | Lyco`;
   const description = `Download Drama Korea Subtitle Indonesia`;
   const canonicalUrl = page > 1 ? `${endpoint}?page=${page}` : `${endpoint}`;
   return {
@@ -76,10 +79,10 @@ export async function generateMetadata({ searchParams }) {
 
 export default async function Home({ searchParams }) {
   const searchParamsResolved = await searchParams;
-  const page = parseInt(searchParamsResolved.page || '1', 12);
+  const page = parseInt(searchParamsResolved.page || 1);
   const limit = 12;
 
-  const { rows: posts, count } = await getData(page, limit);
+  const { data: posts, count } = await getData(page, limit);
 
   const totalPages = Math.ceil(count / limit);
 
@@ -105,8 +108,12 @@ export default async function Home({ searchParams }) {
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }} />
       {/* <LogSend/> */}
+      <div className='w-full h-max'>
+        <Popular />
+      </div>
+      <h1 className='text-xl font-bold text-gray-600 mt-2'>Recent</h1>
       <div
-        className="py-4 grid md:grid-cols-4 grid-cols-2 gap-4 w-full"
+        className="grid md:grid-cols-5 grid-cols-3 my-2 gap-4 w-full"
         itemScope
         itemType="https://schema.org/ItemList"
       >
@@ -115,7 +122,6 @@ export default async function Home({ searchParams }) {
 
         ))}
       </div>
-
       {count > limit && (
         <div className="flex items-center justify-center mt-6 space-x-2">
           {page > 1 && (

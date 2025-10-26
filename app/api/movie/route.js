@@ -1,6 +1,7 @@
 
 
 import { jsonResponse } from "@/lib/jsonResponse";
+import axios from 'axios'
 
 
 
@@ -10,6 +11,7 @@ export async function GET(req){
     const { searchParams } = new URL(req.url);
     try {
         const search = searchParams.get('search')
+        
       
         const response = await fetch(
             `${process.env.ENDPOINT_TMBD}search/multi?query=${encodeURIComponent(search)}&language=id-ID`,
@@ -27,7 +29,7 @@ export async function GET(req){
           }
       
           const data = await response.json();
-          console.log({data:data.results})
+         
      
         return jsonResponse({msg:"success",data:data.results},200)
     } catch (error) {
