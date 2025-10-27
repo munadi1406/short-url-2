@@ -10,7 +10,6 @@ const getData = async (tag) => {
   const data = await Tag.findOne({
     where: {
       name: tag,
-      status: 'publish',
   },
     include: [
       {

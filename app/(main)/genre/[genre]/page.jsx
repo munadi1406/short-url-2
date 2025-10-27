@@ -10,13 +10,15 @@ const getData = async (genre) => {
     const data = await Genre.findOne({
         where: {
             name: genre,
-            status: 'publish',
         },
         include: [
             {
                 model: Post,
                 as: 'posts',
                 through: { attributes: [] },
+                where: {
+                    status: "publish",
+                },
                 include: [
                     {
                         model: Genre,

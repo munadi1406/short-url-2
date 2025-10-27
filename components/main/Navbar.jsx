@@ -6,7 +6,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChartBarStacked, House, Timer, Vote } from 'lucide-react'
+import { ChartBarStacked, House, Timer, Vote,S } from 'lucide-react'
 import { Ubuntu, Nunito_Sans } from 'next/font/google'
 import { Genre } from '@/models/genre'
 import Search from './Search'
@@ -33,8 +33,8 @@ export default async function Navbar() {
         },
         {
             title: "Search",
-            url: "#",
-            icon: <Search />
+            url: "/search",
+            icon: <SearchIcon />
         },
         {
             title: "Ongoing",
