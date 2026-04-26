@@ -1,10 +1,10 @@
-
 import Links from '@/components/post/Links';
 import Episode from '@/models/episode';
 import { Genre } from '@/models/genre';
 import Post from '@/models/post';
 import PostLink from '@/models/postLinks';
 import { Tag } from '@/models/tag';
+import Setting from '@/models/settings';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
@@ -13,9 +13,10 @@ import SkeletonLoading from './loading';
 import dynamic from 'next/dynamic';
 import PostView from '@/models/postView';
 const GradientCard = dynamic(() => import('@/components/main/GradientColorImage'), {
-    loading: () => <SkeletonLoading />, // Skeleton loading sebagai fallback
+    loading: () => <SkeletonLoading />,
 });
 import { AspectRatio } from "@/components/ui/aspect-ratio"
+
 const getDetail = async (slug) => {
     const data = await Post.findOne({
         where: {
@@ -27,23 +28,17 @@ const getDetail = async (slug) => {
                 model: Genre,
                 as: 'genres',
                 attributes: ['name'],
-                through: {
-                    attributes: []
-                }
+                through: { attributes: [] }
             },
             {
                 model: Tag,
                 as: 'tags',
                 attributes: ['name'],
-                through: {
-                    attributes: []
-                }
+                through: { attributes: [] }
             },
             {
                 model: Episode,
-                include: {
-                    model: PostLink,
-                },
+                include: { model: PostLink },
                 separate: true,
                 order: [['title', 'asc']]
             }
@@ -51,9 +46,25 @@ const getDetail = async (slug) => {
     });
     return data;
 };
+
+const getSetting = async () => {
+    try {
+        const setting = await Setting.findOne({
+            order: [['createdAt', 'DESC']],
+        })
+        return setting || null
+    } catch (error) {
+        return null
+    }
+}
+
 export async function generateMetadata({ params }) {
     const { title } = await params;
-    const data = await getDetail(title);  // Ambil detail post berdasarkan slug
+
+    const [data, setting] = await Promise.all([
+        getDetail(title),
+        getSetting(),
+    ])
 
     if (!data) {
         return {
@@ -62,35 +73,47 @@ export async function generateMetadata({ params }) {
         };
     }
 
-    const metaTitle = `Drama Korea ${data.title} - Lyco`;
-    const metaDescription = `Drama Korea ${data.title}-${data.description}` || 'No description available for this post.';
-    const postUrl = `${process.env.NEXT_PUBLIC_ENDPOINT_URL || 'http://localhost:3000'}${data.slug}`;
-    const imageUrl = data.image || `${process.env.NEXT_PUBLIC_ENDPOINT_URL || 'http://localhost:3000'}/default-image.jpg`;
+    const siteName = setting?.namaWebsite || 'Lyco'
+   
+    const favicon  = setting?.favicon     || '/favicon.ico'
+    const logo     = setting?.logo        || null
+    const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL || 'http://localhost:3000'
+
+    const metaTitle       = `${data.title} - ${siteName}`
+    const metaDescription = `${data.title} - ${data.description}` || 'No description available.'
+    const postUrl         = `${endpoint}/${data.slug}`
+    const imageUrl        = data.image || logo || `${endpoint}/default-image.jpg`
+
     return {
         title: metaTitle,
         description: metaDescription,
+        icons: {
+            icon:     favicon,
+            shortcut: favicon,
+            apple:    favicon,
+        },
         openGraph: {
-            title: metaTitle,
+            title:       metaTitle,
             description: metaDescription,
-            url: postUrl,
-            type: 'article',
-            image: imageUrl,
-            siteName: 'Lyco',
+            url:         postUrl,
+            type:        'article',
+            images:      [{ url: imageUrl }],
+            siteName,
         },
         twitter: {
-            card: 'summary_large_image',
-            title: metaTitle,
+            card:        'summary_large_image',
+            title:       metaTitle,
             description: metaDescription,
-            image: imageUrl,
-            site: '@Lyco',
+            images:      [imageUrl],
+            site:        `@${siteName.toLowerCase()}`,
         },
         alternates: {
-            canonical: postUrl, // Menambahkan canonical di sini
+            canonical: postUrl,
         },
     };
 }
+
 const getRelatedPosts = async (genres, excludePostId) => {
-    // Attempt to fetch related posts
     let relatedPosts = await Post.findAll({
         where: {
             id: { [Op.ne]: excludePostId },
@@ -107,7 +130,6 @@ const getRelatedPosts = async (genres, excludePostId) => {
         limit: 6,
     });
 
-    // If no related posts found, fetch random posts
     if (relatedPosts.length === 0) {
         relatedPosts = await Post.findAll({
             where: { id: { [Op.ne]: excludePostId }, status: 'publish' },
@@ -117,32 +139,30 @@ const getRelatedPosts = async (genres, excludePostId) => {
         });
     }
 
-    // Shuffle the related posts
-    relatedPosts = relatedPosts.sort(() => Math.random() - 0.5);
-
-    return relatedPosts;
+    return relatedPosts.sort(() => Math.random() - 0.5);
 };
-
 
 export default async function page({ params }) {
     const { title } = await params;
-    const data = await getDetail(title);
+
+    const [data, setting] = await Promise.all([
+        getDetail(title),
+        getSetting(),
+    ])
+
     if (!data) {
         return <h3 className='text-center text-3xl'>Not Found</h3>
     }
+
     try {
-        await PostView.create({
-            post_id: data.id,
-        });
+        await PostView.create({ post_id: data.id });
+    } catch (error) {}
 
-    } catch (error) {
+   
+    const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL
 
-
-    }
-    const episodes = JSON.parse(JSON.stringify(data.episodes));
+    const episodes     = JSON.parse(JSON.stringify(data.episodes));
     const relatedPosts = await getRelatedPosts(data.genres, data.id);
-
-
 
     const jsonLd = {
         "@context": "https://schema.org",
@@ -152,40 +172,38 @@ export default async function page({ params }) {
                 "@type": "ListItem",
                 "position": 1,
                 "name": "Home",
-                "item": `${process.env.NEXT_PUBLIC_ENDPOINT_URL}`
+                "item": `${endpoint}`
             },
             {
                 "@type": "ListItem",
                 "position": 2,
                 "name": "Ongoing",
-                "item": `${process.env.NEXT_PUBLIC_ENDPOINT_URL}tag/ongoing`
+                "item": `${endpoint}tag/ongoing`
             },
             {
                 "@type": "ListItem",
                 "position": 3,
                 "name": "Completed",
-                "item": `${process.env.NEXT_PUBLIC_ENDPOINT_URL}tag/completed`
+                "item": `${endpoint}tag/completed`
             },
             {
                 "@type": "ListItem",
                 "position": 4,
                 "name": data.title,
-                "item": `${process.env.NEXT_PUBLIC_ENDPOINT_URL}${data.slug}`
+                "item": `${endpoint}${data.slug}`
             }
         ]
     };
 
-
-
     return (
         <>
-            <script type="application/ld+json">
-                {JSON.stringify(jsonLd)}
-            </script>
-
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <div className="w-full flex flex-col gap-2 items-start">
                 <div className="w-full space-y-6">
-                    <GradientCard data={data.toJSON()} className="px-4 shadow-md rounded-md py-2 " />
+                    <GradientCard data={data.toJSON()} className="px-4 shadow-md rounded-md py-2" />
                     <div className="text-gray-700 border-2 w-full p-2 rounded-md">
                         <Links data={episodes} />
                     </div>
@@ -216,7 +234,6 @@ export default async function page({ params }) {
                                             <h4 className="text-xs font-semibold text-gray-600 text-left">
                                                 {post.title}
                                             </h4>
-
                                         </div>
                                     </div>
                                 </Link>

@@ -6,11 +6,11 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ChartBarStacked, House, Timer, Vote,S } from 'lucide-react'
+import { ChartBarStacked, House, Timer, Vote, S } from 'lucide-react'
 import { Ubuntu, Nunito_Sans } from 'next/font/google'
 import { Genre } from '@/models/genre'
-import Search from './Search'
 import { Search as SearchIcon } from "lucide-react";
+import Setting from '@/models/settings'
 const oswald = Ubuntu({
     weight: ['400', '500', '700'],
     subsets: ['cyrillic'],
@@ -23,7 +23,20 @@ const nunito = Nunito_Sans({
     display: 'swap',
     variable: '--font-cinzel',
 });
+const getSetting = async () => {
+    try {
+        const setting = await Setting.findOne({
+            attributes: ['namaWebsite'],
+            order: [['createdAt', 'DESC']],
+        })
+        return setting || null
+    } catch (error) {
+        return null
+    }
+}
 export default async function Navbar() {
+    const setting = await getSetting()
+    const title = setting?.namaWebsite || 'Lyco'  // ← ambil field namaWebsite
     const genres = await Genre.findAll({ attributes: ['name'], order: [['name', 'asc']] })
     const menu = [
         {
@@ -54,7 +67,7 @@ export default async function Navbar() {
                 <h1
                     className={`text-5xl font-bold p-4 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent ${oswald.className}`}
                 >
-                    Lyco
+                    {title}
                 </h1>
             </Link>
 

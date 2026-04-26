@@ -6,7 +6,8 @@ import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import Iklan from '../Iklan/Iklan';
 
-export default function CreateLink() {
+export default function CreateLink({ads}) {
+  
     // State untuk menyimpan slug
     const [clickCount,setClickCount] = useState(0)
     const [slug, setSlug] = useState(null);
@@ -53,6 +54,7 @@ export default function CreateLink() {
     }, []);
 
     const handleCreateLinkClick = () => {
+       
         setLoadingCreate(true);
         let timer = 3; // Set initial time to 3 seconds
 
@@ -94,8 +96,9 @@ export default function CreateLink() {
 
     const handleClick = () => {
         if(clickCount === 0 ){
-          
-            window.open('https://allocationcaller.com/n66f77cjb?key=084d560b78171070835b5485740f5fdf','_blank')
+            
+           const directLink =  ads.directLink || 'https://allocationcaller.com/n66f77cjb?key=084d560b78171070835b5485740f5fdf'
+            window.open(directLink,'_blank')
         }else{
             mutate(slug)
         }
@@ -110,7 +113,7 @@ export default function CreateLink() {
 
     return (
         <>
-            <Iklan />
+            <Iklan ads={ads}/>
             <div className="bg-green-600 flex relative flex-col justify-between p-8">
                 {/* Tombol Create Link */}
                 {showCreateButton && (

@@ -1,13 +1,54 @@
 'use client'
-import Script from 'next/script'
 import React from 'react'
 
-export default function Iklan() {
+function AdSlot({ html }) {
+    const ref = React.useRef(null)
+
+    React.useEffect(() => {
+        if (!ref.current || !html) return
+
+        // clear dulu
+        ref.current.innerHTML = ''
+
+        const wrapper = document.createRange().createContextualFragment(html)
+        ref.current.appendChild(wrapper)
+    }, [html])
+
+    return <div ref={ref} />
+}
+
+export default function Iklan({ ads }) {
+    if (!ads) return null
+
     return (
         <div>
-           
-            <Script type='text/javascript' src='//allocationcaller.com/69/b8/72/69b87261afd7bdff72e56cf33ddc7552.js'></Script>
-            <Script type='text/javascript' src='//allocationcaller.com/7f/20/c4/7f20c43dba8718a3dc89714376c16c36.js'></Script>
+            {/* Header */}
+            {ads.header && (
+                <div className="w-full my-2">
+                    <AdSlot html={ads.header} />
+                </div>
+            )}
+
+            {/* Sidebar */}
+            {ads.sidebar && (
+                <div className="w-full my-2">
+                    <AdSlot html={ads.sidebar} />
+                </div>
+            )}
+
+            {/* In-Content */}
+            {ads.inContent && (
+                <div className="w-full my-2">
+                    <AdSlot html={ads.inContent} />
+                </div>
+            )}
+
+            {/* Footer */}
+            {ads.footer && (
+                <div className="w-full my-2">
+                    <AdSlot html={ads.footer} />
+                </div>
+            )}
         </div>
     )
 }

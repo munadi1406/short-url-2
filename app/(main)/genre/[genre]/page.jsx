@@ -2,6 +2,7 @@ import MainCard from '@/components/main/MainCard';
 import { Genre } from '@/models/genre';
 import Post from '@/models/post';
 import { Tag } from '@/models/tag';
+import Setting from '@/models/settings';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
@@ -16,9 +17,7 @@ const getData = async (genre) => {
                 model: Post,
                 as: 'posts',
                 through: { attributes: [] },
-                where: {
-                    status: "publish",
-                },
+                where: { status: "publish" },
                 include: [
                     {
                         model: Genre,
@@ -37,30 +36,57 @@ const getData = async (genre) => {
     });
     return data;
 };
+
+const getSetting = async () => {
+    try {
+        const setting = await Setting.findOne({
+            order: [['createdAt', 'DESC']],
+        })
+        return setting || null
+    } catch (error) {
+        return null
+    }
+}
+
 export async function generateMetadata({ params }) {
     const genre = decodeURIComponent(params.genre);
     const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL || 'http://localhost:3000';
-    const title = `Drama Korea ${genre} - Lyco `;
-    const description = `Drama Korea ${genre} - Lyco - Download Drama Korea Subtitle Indonesia `;
-    const canonicalUrl = `${endpoint}genre/${genre}`;
+
+    const setting = await getSetting()
+
+    const siteName    = setting?.namaWebsite || 'Lyco'
+    const favicon     = setting?.favicon     || '/favicon.ico'
+    const logo        = setting?.logo        || null
+
+    const title       = `${genre} - ${siteName}`
+    const description = `Kumpulan drama genre ${genre} - ${siteName}`
+    const canonicalUrl = `${endpoint}genre/${genre}`
+
     return {
         title,
         description,
+        icons: {
+            icon:     favicon,
+            shortcut: favicon,
+            apple:    favicon,
+        },
         openGraph: {
             title,
             description,
-            url: `${endpoint}genre/${genre}`,
-            type: 'website',
-            siteName: 'Lyco',
+            url:      canonicalUrl,
+            type:     'website',
+            siteName,
+            images:   logo ? [{ url: logo }] : [],
         },
         twitter: {
-            card: 'summary_large_image',
+            card:        'summary_large_image',
             title,
             description,
-            site: '@Lyco',
+            site:        `@${siteName.toLowerCase()}`,
+            images:      logo ? [logo] : [],
         },
         alternates: {
-            canonical: canonicalUrl, // Menambahkan canonical di sini
+            canonical: canonicalUrl,
         },
     };
 }
@@ -68,16 +94,19 @@ export async function generateMetadata({ params }) {
 export default async function Page({ params, searchParams }) {
     const param = await params;
     const genre = decodeURIComponent(param.genre)
-    const limit = 12; // Menentukan batasan data per halaman
+    const limit = 12;
 
-    const searchParamsResolved = await searchParams; // Awaiting searchParams
-    const page = parseInt(searchParamsResolved.page || 1); // Getting the page number or default to 1
+    const searchParamsResolved = await searchParams;
+    const page = parseInt(searchParamsResolved.page || 1);
 
+    const [genreData, setting] = await Promise.all([
+        getData(genre),
+        getSetting(),
+    ])
 
-    const genreData = await getData(genre);
+    const siteName = setting?.namaWebsite || 'Lyco'
 
     if (!genreData || genreData.posts.length === 0) {
-        // Jika tidak ada data ditemukan
         return (
             <div className="py-4">
                 <h3 className="text-lg font-semibold text-gray-700">
@@ -89,19 +118,18 @@ export default async function Page({ params, searchParams }) {
     }
 
     const { posts } = genreData;
-    const totalPosts = posts.length;
-    const totalPages = Math.ceil(totalPosts / limit); // Menghitung total halaman
-    const startPage = Math.max(1, page - 2); // Menentukan halaman awal yang ditampilkan
-    const endPage = Math.min(totalPages, page + 2); // Menentukan halaman akhir yang ditampilkan
+    const totalPosts  = posts.length;
+    const totalPages  = Math.ceil(totalPosts / limit);
+    const startPage   = Math.max(1, page - 2);
+    const endPage     = Math.min(totalPages, page + 2);
 
     return (
         <>
             <h3 className="text-2xl font-semibold text-gray-700 capitalize">
                 {genre}
             </h3>
-
             <div
-                className="py-4 grid md:grid-cols-4 grid-cols-2 gap-4 w-full"
+                className="py-4 grid md:grid-cols-5 grid-cols-2 gap-4 w-full"
                 itemScope
                 itemType="https://schema.org/ItemList"
             >
@@ -110,7 +138,6 @@ export default async function Page({ params, searchParams }) {
                 ))}
             </div>
 
-            {/* Pagination Controls */}
             {totalPages > 1 && (
                 <div className="flex items-center justify-center mt-6 space-x-2">
                     {page > 1 && (
@@ -121,7 +148,6 @@ export default async function Page({ params, searchParams }) {
                             <ChevronLeft />
                         </Link>
                     )}
-
                     {Array.from({ length: endPage - startPage + 1 }, (_, index) => {
                         const pageNumber = startPage + index;
                         return (
@@ -137,7 +163,6 @@ export default async function Page({ params, searchParams }) {
                             </Link>
                         );
                     })}
-
                     {page < totalPages && (
                         <Link
                             href={`${genre}/?page=${page + 1}`}

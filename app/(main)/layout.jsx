@@ -14,10 +14,6 @@ const nunito = Nunito_Sans({
     weight: ['400', '500', '600', '700']
 })
 export const metadata = {
-    title: {
-        template: '%s | Lyco',
-        default: 'Lyco', 
-    },
     robots: {
         index: true,
         follow: true,

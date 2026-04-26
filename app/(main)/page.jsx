@@ -1,9 +1,9 @@
 import MainCard from '@/components/main/MainCard';
 import Popular from '@/components/main/Popular';
-// import LogSend from '@/lib/LogSend';
 import { Genre } from '@/models/genre';
 import Post from '@/models/post';
 import { Tag } from '@/models/tag';
+import Setting from '@/models/settings';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -25,54 +25,80 @@ const getData = async (page = 1, limit = 12) => {
           model: Genre,
           attributes: ['name'],
           as: 'genres',
-          through: {
-            attributes: [],
-          },
+          through: { attributes: [] },
         },
         {
           model: Tag,
           attributes: ['name'],
           as: 'tags',
-          through: {
-            attributes: [],
-          },
+          through: { attributes: [] },
         },
       ],
     });
 
     return { data: result.rows, count: result.count };
   } catch (error) {
-
     return { rows: [], count: 0 };
   }
 };
+
+const getSetting = async () => {
+  try {
+    const setting = await Setting.findOne({
+      order: [['createdAt', 'DESC']],
+    })
+    return setting || null
+  } catch (error) {
+    return null
+  }
+}
 
 export async function generateMetadata({ searchParams }) {
   const searchParamsResolved = await searchParams;
   const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL;
   const page = parseInt(searchParamsResolved.page || 1);
-  const title = page > 1 ? `Page ${page} | Lyco` : `Download Drama Korea Subtitle Indonesia | Lyco`;
-  const description = `Download Drama Korea Subtitle Indonesia`;
-  const canonicalUrl = page > 1 ? `${endpoint}?page=${page}` : `${endpoint}`;
+
+  const setting = await getSetting()
+
+  const siteName = setting?.namaWebsite || 'Lyco'
+  const siteDescription = setting?.description || 'Download Drama Korea Subtitle Indonesia'
+  const keywords = setting?.keyword || ''
+  const favicon = setting?.favicon || '/favicon.ico'
+  const logo = setting?.logo || null
+
+  const title = page > 1
+  ? `${siteName} - Halaman ${page}`
+  : siteName  // cukup nama website saja untuk homepage
+
+  const canonicalUrl = page > 1 ? `${endpoint}?page=${page}` : `${endpoint}`
+
   return {
     title,
-    description,
+    description: siteDescription,
+    keywords,
     robots: 'index, follow',
+    icons: {
+      icon: favicon,
+      shortcut: favicon,
+      apple: favicon,
+    },
     openGraph: {
       title,
-      description,
+      description: siteDescription,
       url: `${endpoint}?page=${page}`,
       type: 'website',
-      siteName: 'Lyco',
+      siteName,
+      images: logo ? [{ url: logo }] : [],
     },
     twitter: {
       card: 'summary_large_image',
       title,
-      description,
-      site: '@lyco',
+      description: siteDescription,
+      site: `@${siteName.toLowerCase()}`,
+      images: logo ? [logo] : [],
     },
     alternates: {
-      canonical: canonicalUrl, // Menambahkan canonical di sini
+      canonical: canonicalUrl,
     },
   };
 }
@@ -82,15 +108,19 @@ export default async function Home({ searchParams }) {
   const page = parseInt(searchParamsResolved.page || 1);
   const limit = 12;
 
-  const { data: posts, count } = await getData(page, limit);
+  const [{ data: posts, count }, setting] = await Promise.all([
+    getData(page, limit),
+    getSetting(),
+  ])
 
   const totalPages = Math.ceil(count / limit);
-
-  // Generate range of pages
   const maxVisiblePages = 5;
   const startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
   const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
   const endpoint = process.env.NEXT_PUBLIC_ENDPOINT_URL;
+  const siteName = setting?.namaWebsite || 'Lyco'
+
   const jsonLdData = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -106,8 +136,10 @@ export default async function Home({ searchParams }) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }} />
-      {/* <LogSend/> */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
+      />
       <div className='w-full h-max'>
         <Popular />
       </div>
@@ -119,7 +151,6 @@ export default async function Home({ searchParams }) {
       >
         {posts.map((post, i) => (
           <MainCard post={post} key={i} />
-
         ))}
       </div>
       {count > limit && (
@@ -132,7 +163,6 @@ export default async function Home({ searchParams }) {
               <ChevronLeft />
             </Link>
           )}
-
           {Array.from({ length: endPage - startPage + 1 }, (_, index) => {
             const pageNumber = startPage + index;
             return (
@@ -148,7 +178,6 @@ export default async function Home({ searchParams }) {
               </Link>
             );
           })}
-
           {page < totalPages && (
             <Link
               href={`/?page=${page + 1}`}

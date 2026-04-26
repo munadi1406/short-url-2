@@ -152,6 +152,11 @@ const data = {
   ],
   projects: [
     {
+      name: "Settings",
+      url: "/dashboard/settings",
+      icon: Settings2,
+    },
+    {
       name: "Genre",
       url: "/dashboard/genre",
       icon:GalleryHorizontal,
